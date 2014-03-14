@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import, unicode_literals
+
+
+class FieldBase(object):
+    def __init__(self):
+        self._attr = ''
+
+
+    def _set_attr_name(self, name):
+        self._attr = name
+
+    def __set__(self, instance, value):
+        setattr(instance, '_' + self._attr, value)
+
+    def __get__(self, instance, owner):
+        return getattr(instance, '_' + self._attr)
+
+    def validate(self, value):
+        '''
+        Abstract method that must validate the value
+        It must return None if the value is valid and a error msg otherelse.
+        Ex: If expected input must be int, validate should a return a msg like
+        "The filed must be a integer value"
+        '''
+        raise NotImplementedError()
+
+    def transform(self, value):
+        '''
+        Abstract method that must transform the value from string
+        Ex: if the expected type is int, it should return int(self._attr)
+        '''
+        raise NotImplementedError()
+
+
+class _ValidatorMetaclass(type):
+    def __new__(cls, attr_name, bases, attrs):
+        def set_descriptor_attr_name(descriptor, name):
+            descriptor._set_attr_name(name)
+            return descriptor
+
+        descriptors = (set_descriptor_attr_name(attr_value, attr_name)
+                       for attr_name, attr_value in attrs.iteritems()
+                       if hasattr(attr_value, '_set_attr_name'))
+
+        attrs['_fields'] = {d._attr: d for d in descriptors}
+
+        return super(_ValidatorMetaclass, cls).__new__(cls, attr_name, bases, attrs)
+
+
+class Validator(object):
+    _fields = ()
+    __metaclass__ = _ValidatorMetaclass
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.iteritems():
+            setattr(self, k, v)
+
+    def validate(self):
+        errors = {}
+        for k, v in self._fields.iteritems():
+            error_msg = v.validate(getattr(self, k))
+            if error_msg:
+                errors[k] = error_msg
+        return errors
+
+    def transform(self):
+        return {k: v.transform(getattr(self, k)) for k, v in self._fields.iteritems()}
+
+
+
