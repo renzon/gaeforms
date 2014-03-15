@@ -3,7 +3,9 @@ from __future__ import absolute_import, unicode_literals
 
 
 class FieldBase(object):
-    def __init__(self):
+    def __init__(self, required=False, default=None):
+        self.default = default
+        self.required = required
         self._attr = ''
 
 
@@ -13,24 +15,38 @@ class FieldBase(object):
     def __set__(self, instance, value):
         setattr(instance, '_' + self._attr, value)
 
-    def __get__(self, instance, owner):
-        return getattr(instance, '_' + self._attr)
-
-    def validate(self, value):
+    def validate_field(self, value):
         '''
-        Abstract method that must validate the value
+        Method that must validate the value
         It must return None if the value is valid and a error msg otherelse.
         Ex: If expected input must be int, validate should a return a msg like
         "The filed must be a integer value"
         '''
-        raise NotImplementedError()
+        if self.default is not None:
+            if value is None or value == '':
+                value = self.default
+        if self.required and (value is None or value == ''):
+            return '%s is required' % self._attr
+
+
+    def __get__(self, instance, owner):
+        return getattr(instance, '_' + self._attr)
+
+    def validate(self, value):
+        return self.validate_field(value)
 
     def transform(self, value):
+        return self.transform_field(value)
+
+    def transform_field(self, value):
         '''
-        Abstract method that must transform the value from string
+        Method that must transform the value from string
         Ex: if the expected type is int, it should return int(self._attr)
         '''
-        raise NotImplementedError()
+        if self.default is not None:
+            if value is None or value == '':
+                value = self.default
+        return value
 
 
 class _ValidatorMetaclass(type):

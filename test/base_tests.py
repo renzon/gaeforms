@@ -9,14 +9,13 @@ def error_msg(attr_name):
 
 
 class FieldMock(FieldBase):
-    def validate(self, value):
+    def validate_field(self, value):
         if not value:
             return error_msg(self._attr)
 
-    def transform(self,value):
+    def transform_field(self, value):
         return int(value)
 
-FAIL_PROTECTED_VALIDATION = 'fail protected'
 
 mock1 = FieldMock()
 mock2 = FieldMock()
@@ -26,7 +25,6 @@ class ValidatorExample(Validator):
     attr1 = mock1
     attr2 = mock2
     non_field = 'foo'
-
 
 
 class ValidatorTests(unittest.TestCase):
@@ -53,3 +51,31 @@ class ValidatorTests(unittest.TestCase):
     def test_transform(self):
         v1 = ValidatorExample(attr1='1', attr2='2')
         self.assertDictEqual({'attr1': 1, 'attr2': 2}, v1.transform())
+
+
+class FieldBaseTests(unittest.TestCase):
+    def test_required(self):
+        field_not_required = FieldBase()
+        self.assertIsNone(None, field_not_required.validate(''))
+        self.assertIsNone(field_not_required.validate(None))
+        self.assertIsNone(field_not_required.validate('Foo'))
+        field_required = FieldBase(required=True)
+        self.assertIsNotNone(field_required.validate(''))
+        self.assertIsNotNone(field_required.validate(None))
+        self.assertIsNone(field_required.validate('Foo'))
+
+    def test_default(self):
+        DEFAULT = 'default'
+        field = FieldBase(default=DEFAULT)
+        self.assertEqual(DEFAULT, field.transform_field(''))
+        self.assertEqual(DEFAULT, field.transform_field(None))
+        self.assertEqual("X", field.transform_field('X'))
+
+    def test_default_plus_required(self):
+        DEFAULT = 'default'
+        field = FieldBase(default=DEFAULT, required=True)
+        self.assertEqual(DEFAULT, field.transform_field(''))
+        self.assertEqual(DEFAULT, field.transform_field(None))
+        self.assertEqual("X", field.transform_field('X'))
+        self.assertIsNone(None, field.validate(''))
+        self.assertIsNone(field.validate(None))
