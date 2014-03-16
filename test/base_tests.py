@@ -67,15 +67,43 @@ class FieldBaseTests(unittest.TestCase):
     def test_default(self):
         DEFAULT = 'default'
         field = FieldBase(default=DEFAULT)
-        self.assertEqual(DEFAULT, field.transform_field(''))
-        self.assertEqual(DEFAULT, field.transform_field(None))
-        self.assertEqual("X", field.transform_field('X'))
+        self.assertEqual(DEFAULT, field.transform(''))
+        self.assertEqual(DEFAULT, field.transform(None))
+        self.assertEqual("X", field.transform('X'))
 
     def test_default_plus_required(self):
         DEFAULT = 'default'
         field = FieldBase(default=DEFAULT, required=True)
-        self.assertEqual(DEFAULT, field.transform_field(''))
-        self.assertEqual(DEFAULT, field.transform_field(None))
-        self.assertEqual("X", field.transform_field('X'))
+        self.assertEqual(DEFAULT, field.transform(''))
+        self.assertEqual(DEFAULT, field.transform(None))
+        self.assertEqual("X", field.transform('X'))
         self.assertIsNone(None, field.validate(''))
         self.assertIsNone(field.validate(None))
+        self.assertIsNone(field.validate('X'))
+
+    def test_choices(self):
+        field = FieldBase(choices=['1', '2'])
+        self.assertIsNone(field.validate('1'))
+        self.assertIsNone(field.validate('2'))
+        self.assertIsNotNone(field.validate(None))
+
+    def test_repeated(self):
+        field = FieldBase(repeated=True)
+        self.assertIsNone(field.validate([]))
+        self.assertIsNone(field.validate(['1']))
+        self.assertIsNone(field.validate(['1', '2']))
+        self.assertIsNone(field.validate(None))
+        self.assertIsNone(field.validate([None]))
+
+    def test_repeated_plus_required(self):
+        field = FieldBase(repeated=True, required=True)
+        self.assertIsNone(field.validate(['1']))
+        self.assertIsNone(field.validate(['1', '2']))
+        self.assertIsNotNone(field.validate(None))
+        self.assertIsNotNone(field.validate([None]))
+        self.assertIsNotNone(field.validate([]))
+        self.assertIsNotNone(field.validate(['1,', None]))
+
+    def test_repeated_transformation(self):
+        field = FieldMock(repeated=True)
+        self.assertListEqual([1, 2, 3], field.transform(['1', '2', '3']))

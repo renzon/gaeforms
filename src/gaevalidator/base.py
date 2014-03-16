@@ -3,7 +3,9 @@ from __future__ import absolute_import, unicode_literals
 
 
 class FieldBase(object):
-    def __init__(self, required=False, default=None):
+    def __init__(self, required=False, default=None, repeated=False, choices=None):
+        self.repeated = repeated
+        self.choices = choices
         self.default = default
         self.required = required
         self._attr = ''
@@ -22,6 +24,11 @@ class FieldBase(object):
         Ex: If expected input must be int, validate should a return a msg like
         "The filed must be a integer value"
         '''
+        if self.choices:
+            value = self.transform_field(value)
+            if value in self.choices:
+                return None
+            return '%s should be one of %s' % (self._attr, self.choices)
         if self.default is not None:
             if value is None or value == '':
                 value = self.default
@@ -33,9 +40,21 @@ class FieldBase(object):
         return getattr(instance, '_' + self._attr)
 
     def validate(self, value):
+        if self.repeated:
+            if value:
+                error = None
+                for v in value:
+                    error = self.validate_field(v)
+                return error
+            else:
+                value = None
         return self.validate_field(value)
 
     def transform(self, value):
+        if self.repeated:
+            if value:
+                return [self.transform_field(v) for v in value]
+            return []
         return self.transform_field(value)
 
     def transform_field(self, value):
