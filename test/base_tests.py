@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 import unittest
-from gaevalidator.base import FieldBase, Validator
+from gaevalidator.base import BaseField, Validator
 
 
 def error_msg(attr_name):
     return '%s has error' % attr_name
 
 
-class FieldMock(FieldBase):
+class MockField(BaseField):
     def validate_field(self, value):
         if not value:
             return error_msg(self._attr)
@@ -17,8 +17,8 @@ class FieldMock(FieldBase):
         return int(value)
 
 
-mock1 = FieldMock()
-mock2 = FieldMock()
+mock1 = MockField()
+mock2 = MockField()
 
 
 class ValidatorExample(Validator):
@@ -53,27 +53,27 @@ class ValidatorTests(unittest.TestCase):
         self.assertDictEqual({'attr1': 1, 'attr2': 2}, v1.transform())
 
 
-class FieldBaseTests(unittest.TestCase):
+class BaseFieldTests(unittest.TestCase):
     def test_required(self):
-        field_not_required = FieldBase()
+        field_not_required = BaseField()
         self.assertIsNone(None, field_not_required.validate(''))
         self.assertIsNone(field_not_required.validate(None))
         self.assertIsNone(field_not_required.validate('Foo'))
-        field_required = FieldBase(required=True)
+        field_required = BaseField(required=True)
         self.assertIsNotNone(field_required.validate(''))
         self.assertIsNotNone(field_required.validate(None))
         self.assertIsNone(field_required.validate('Foo'))
 
     def test_default(self):
         DEFAULT = 'default'
-        field = FieldBase(default=DEFAULT)
+        field = BaseField(default=DEFAULT)
         self.assertEqual(DEFAULT, field.transform(''))
         self.assertEqual(DEFAULT, field.transform(None))
         self.assertEqual("X", field.transform('X'))
 
     def test_default_plus_required(self):
         DEFAULT = 'default'
-        field = FieldBase(default=DEFAULT, required=True)
+        field = BaseField(default=DEFAULT, required=True)
         self.assertEqual(DEFAULT, field.transform(''))
         self.assertEqual(DEFAULT, field.transform(None))
         self.assertEqual("X", field.transform('X'))
@@ -82,13 +82,13 @@ class FieldBaseTests(unittest.TestCase):
         self.assertIsNone(field.validate('X'))
 
     def test_choices(self):
-        field = FieldBase(choices=['1', '2'])
+        field = BaseField(choices=['1', '2'])
         self.assertIsNone(field.validate('1'))
         self.assertIsNone(field.validate('2'))
         self.assertIsNotNone(field.validate(None))
 
     def test_repeated(self):
-        field = FieldBase(repeated=True)
+        field = BaseField(repeated=True)
         self.assertIsNone(field.validate([]))
         self.assertIsNone(field.validate(['1']))
         self.assertIsNone(field.validate(['1', '2']))
@@ -96,7 +96,7 @@ class FieldBaseTests(unittest.TestCase):
         self.assertIsNone(field.validate([None]))
 
     def test_repeated_plus_required(self):
-        field = FieldBase(repeated=True, required=True)
+        field = BaseField(repeated=True, required=True)
         self.assertIsNone(field.validate(['1']))
         self.assertIsNone(field.validate(['1', '2']))
         self.assertIsNotNone(field.validate(None))
@@ -105,5 +105,5 @@ class FieldBaseTests(unittest.TestCase):
         self.assertIsNotNone(field.validate(['1,', None]))
 
     def test_repeated_transformation(self):
-        field = FieldMock(repeated=True)
+        field = MockField(repeated=True)
         self.assertListEqual([1, 2, 3], field.transform(['1', '2', '3']))

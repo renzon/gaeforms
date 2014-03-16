@@ -2,7 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 
-class FieldBase(object):
+class BaseField(object):
     def __init__(self, required=False, default=None, repeated=False, choices=None):
         self.repeated = repeated
         self.choices = choices
