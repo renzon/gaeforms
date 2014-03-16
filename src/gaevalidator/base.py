@@ -68,6 +68,25 @@ class BaseField(object):
         return value
 
 
+# Concrete fields
+
+class IntegerField(BaseField):
+    def validate_field(self, value):
+        try:
+            value = self.transform_field(value)
+            return super(IntegerField, self).validate_field(value)
+        except:
+            return '%s must be integer' % self._attr
+
+
+    def transform_field(self, value):
+        if value == '':
+            value = None
+        elif value is not None:
+            value = int(value)
+        return super(IntegerField, self).transform_field(value)
+
+
 class _ValidatorMetaclass(type):
     def __new__(cls, attr_name, bases, attrs):
         def set_descriptor_attr_name(descriptor, name):

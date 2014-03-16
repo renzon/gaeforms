@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 import unittest
-from gaevalidator.base import BaseField, Validator
+from gaevalidator.base import BaseField, Validator, IntegerField
 
 
 def error_msg(attr_name):
@@ -107,3 +107,26 @@ class BaseFieldTests(unittest.TestCase):
     def test_repeated_transformation(self):
         field = MockField(repeated=True)
         self.assertListEqual([1, 2, 3], field.transform(['1', '2', '3']))
+
+
+class IntergerFieldTests(unittest.TestCase):
+    def test_transformation(self):
+        field = IntegerField()
+        self.assertIsNone(field.transform(None))
+        self.assertIsNone(field.transform(''))
+        self.assertEqual(0, field.transform(0))
+        self.assertEqual(1, field.transform(1))
+        self.assertEqual(0, field.transform('0'))
+        self.assertEqual(1, field.transform('1'))
+
+    def test_validation(self):
+        field = IntegerField()
+        self.assertIsNone(field.validate(None))
+        self.assertIsNone(field.validate(''))
+        self.assertIsNone(field.validate(0))
+        self.assertIsNone(field.validate(1))
+        self.assertIsNone(field.validate('0'))
+        self.assertIsNone(field.validate('1'))
+        self.assertIsNotNone(field.validate('foo'))
+        self.assertIsNotNone(field.validate('123h'))
+        self.assertIsNotNone(field.validate('0x456'))
