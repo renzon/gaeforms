@@ -121,12 +121,13 @@ class IntergerFieldTests(unittest.TestCase):
 
     def test_validation(self):
         field = IntegerField()
+        field._set_attr_name('n')
         self.assertIsNone(field.validate(None))
         self.assertIsNone(field.validate(''))
         self.assertIsNone(field.validate(0))
         self.assertIsNone(field.validate(1))
         self.assertIsNone(field.validate('0'))
         self.assertIsNone(field.validate('1'))
-        self.assertIsNotNone(field.validate('foo'))
-        self.assertIsNotNone(field.validate('123h'))
-        self.assertIsNotNone(field.validate('0x456'))
+        self.assertEqual('n must be integer',field.validate('foo'))
+        self.assertEqual('n must be integer',field.validate('123h'))
+        self.assertEqual('n must be integer',field.validate('0x456'))
