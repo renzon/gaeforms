@@ -16,6 +16,7 @@ registry(IntegerProperty, IntegerField)
 class NotRegisteredProperty(Exception):
     pass
 
+
 class InvalidParams(Exception):
     pass
 
@@ -28,8 +29,9 @@ def extract_names(properties):
 def make_include_function(include, exclude):
     if include and exclude:
         raise InvalidParams('_include and _exclude can not be not None at same time')
+
     def should_include(key):
-                return True
+        return True
 
     if include is not None:
         def should_include(key):
@@ -41,6 +43,13 @@ def make_include_function(include, exclude):
     return should_include
 
 
+def set_options(model_property, field):
+    field.required = model_property._required
+    field.default = model_property._default
+    field.repeated = model_property._repeated
+    field.choices = model_property._choices
+    return field
+
 class _ModelValidatorMetaclass(_ValidatorMetaclass):
     def __new__(cls, class_to_be_created_name, bases, attrs):
         model_class = attrs.get('_model_class')
@@ -49,7 +58,7 @@ class _ModelValidatorMetaclass(_ValidatorMetaclass):
             include = extract_names(attrs.get('_include'))
             exclude = extract_names(attrs.get('_exclude'))
 
-            should_include=make_include_function(include,exclude)
+            should_include = make_include_function(include, exclude)
 
             for k, v in properties.iteritems():
                 if should_include(k):
@@ -60,7 +69,7 @@ class _ModelValidatorMetaclass(_ValidatorMetaclass):
                               (k, class_to_be_created_name, v.__class__)
                         raise NotRegisteredProperty(msg)
 
-                    attrs[k] = field_class()
+                    attrs[k] = set_options(v, field_class())
         return super(_ModelValidatorMetaclass, cls).__new__(cls, class_to_be_created_name, bases, attrs)
 
 

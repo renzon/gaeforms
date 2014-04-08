@@ -22,7 +22,7 @@ class ModelValidatorTests(unittest.TestCase):
     def test_fields(self):
         properties = ['integer', 'integer_required', 'integer_repeated',
                       'integer_choices', 'integer_default']
-        self.assertSetEqual(set(properties),set(IntegerModelValidator._fields.iterkeys()))
+        self.assertSetEqual(set(properties), set(IntegerModelValidator._fields.iterkeys()))
         for p in properties:
             self.assertIsInstance(IntegerModelValidator._fields[p], IntegerField)
 
@@ -33,18 +33,18 @@ class ModelValidatorTests(unittest.TestCase):
             _model_class = IntegerModelMock
             _include = (IntegerModelMock.integer, IntegerModelMock.integer_required)
 
-        self.assertSetEqual(set(properties),set(IntegerInclude._fields.iterkeys()))
+        self.assertSetEqual(set(properties), set(IntegerInclude._fields.iterkeys()))
         for p in properties:
             self.assertIsInstance(IntegerInclude._fields[p], IntegerField)
 
     def test_exclude(self):
-        properties = ['integer_repeated','integer_choices', 'integer_default']
+        properties = ['integer_repeated', 'integer_choices', 'integer_default']
 
         class IntegerInclude(ModelValidator):
             _model_class = IntegerModelMock
             _exclude = (IntegerModelMock.integer, IntegerModelMock.integer_required)
 
-        self.assertSetEqual(set(properties),set(IntegerInclude._fields.iterkeys()))
+        self.assertSetEqual(set(properties), set(IntegerInclude._fields.iterkeys()))
         for p in properties:
             self.assertIsInstance(IntegerInclude._fields[p], IntegerField)
 
@@ -56,5 +56,11 @@ class ModelValidatorTests(unittest.TestCase):
                 _exclude = (IntegerModelMock.integer, IntegerModelMock.integer_required)
                 _include = (IntegerModelMock.integer, IntegerModelMock.integer_required)
 
-        self.assertRaises(InvalidParams,f)
+        self.assertRaises(InvalidParams, f)
+
+    def test_property_options(self):
+        self.assertTrue(IntegerModelValidator._fields['integer_required'].required)
+        self.assertTrue(IntegerModelValidator._fields['integer_repeated'].repeated)
+        self.assertSetEqual(frozenset([1, 2]), IntegerModelValidator._fields['integer_choices'].choices)
+        self.assertEqual(0, IntegerModelValidator._fields['integer_default'].default)
 
