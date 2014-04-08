@@ -88,7 +88,7 @@ class IntegerField(BaseField):
 
 
 class _ValidatorMetaclass(type):
-    def __new__(cls, attr_name, bases, attrs):
+    def __new__(cls, class_to_be_created_name, bases, attrs):
         def set_descriptor_attr_name(descriptor, name):
             descriptor._set_attr_name(name)
             return descriptor
@@ -99,7 +99,7 @@ class _ValidatorMetaclass(type):
 
         attrs['_fields'] = {d._attr: d for d in descriptors}
 
-        return super(_ValidatorMetaclass, cls).__new__(cls, attr_name, bases, attrs)
+        return super(_ValidatorMetaclass, cls).__new__(cls, class_to_be_created_name, bases, attrs)
 
 
 class Validator(object):
