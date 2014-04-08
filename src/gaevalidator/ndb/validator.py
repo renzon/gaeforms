@@ -27,9 +27,21 @@ class _ModelValidatorMetaclass(_ValidatorMetaclass):
         model_class = attrs.get('_model_class')
         if model_class:
             properties = model_class._properties
-            include=extract_names(attrs.get('_include'))
+            include = extract_names(attrs.get('_include'))
+            exclude = extract_names(attrs.get('_exclude'))
+
+            def should_include(key):
+                return True
+
+            if include is not None:
+                def should_include(key):
+                    return key in include
+            elif exclude is not None:
+                def should_include(key):
+                    return key not in exclude
+
             for k, v in properties.iteritems():
-                if include is None or k in include:
+                if should_include(k):
                     field_class = _property_to_field_dct.get(v.__class__, None)
 
                     if field_class is None:

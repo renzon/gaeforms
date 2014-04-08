@@ -37,3 +37,14 @@ class ModelValidatorTests(unittest.TestCase):
         for p in properties:
             self.assertIsInstance(IntegerInclude._fields[p], IntegerField)
 
+    def test_exclude(self):
+        properties = ['integer_repeated','integer_choices', 'integer_default']
+
+        class IntegerInclude(ModelValidator):
+            _model_class = IntegerModelMock
+            _exclude = (IntegerModelMock.integer, IntegerModelMock.integer_required)
+
+        self.assertSetEqual(set(properties),set(IntegerInclude._fields.iterkeys()))
+        for p in properties:
+            self.assertIsInstance(IntegerInclude._fields[p], IntegerField)
+
