@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import unittest
 from google.appengine.ext import ndb
 from gaevalidator.base import IntegerField
-from gaevalidator.ndb.validator import ModelValidator
+from gaevalidator.ndb.validator import ModelValidator, InvalidParams
 
 
 class IntegerModelMock(ndb.Model):
@@ -47,4 +47,14 @@ class ModelValidatorTests(unittest.TestCase):
         self.assertSetEqual(set(properties),set(IntegerInclude._fields.iterkeys()))
         for p in properties:
             self.assertIsInstance(IntegerInclude._fields[p], IntegerField)
+
+    def test_include_exclude_definition_error(self):
+
+        def f():
+            class IntegerInclude(ModelValidator):
+                _model_class = IntegerModelMock
+                _exclude = (IntegerModelMock.integer, IntegerModelMock.integer_required)
+                _include = (IntegerModelMock.integer, IntegerModelMock.integer_required)
+
+        self.assertRaises(InvalidParams,f)
 

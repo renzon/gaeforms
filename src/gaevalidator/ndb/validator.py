@@ -16,10 +16,29 @@ registry(IntegerProperty, IntegerField)
 class NotRegisteredProperty(Exception):
     pass
 
+class InvalidParams(Exception):
+    pass
+
 
 def extract_names(properties):
     if properties:
         return set(p._code_name for p in properties)
+
+
+def make_include_function(include, exclude):
+    if include and exclude:
+        raise InvalidParams('_include and _exclude can not be not None at same time')
+    def should_include(key):
+                return True
+
+    if include is not None:
+        def should_include(key):
+            return key in include
+    elif exclude is not None:
+        def should_include(key):
+            return key not in exclude
+
+    return should_include
 
 
 class _ModelValidatorMetaclass(_ValidatorMetaclass):
@@ -30,15 +49,7 @@ class _ModelValidatorMetaclass(_ValidatorMetaclass):
             include = extract_names(attrs.get('_include'))
             exclude = extract_names(attrs.get('_exclude'))
 
-            def should_include(key):
-                return True
-
-            if include is not None:
-                def should_include(key):
-                    return key in include
-            elif exclude is not None:
-                def should_include(key):
-                    return key not in exclude
+            should_include=make_include_function(include,exclude)
 
             for k, v in properties.iteritems():
                 if should_include(k):
