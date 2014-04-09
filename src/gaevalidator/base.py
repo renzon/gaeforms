@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+from decimal import Decimal
 
 
 class BaseField(object):
@@ -9,6 +10,12 @@ class BaseField(object):
         self.default = default
         self.required = required
         self._attr = ''
+
+    def set_options(self, model_property):
+        self.required = model_property._required
+        self.default = model_property._default
+        self.repeated = model_property._repeated
+        self.choices = model_property._choices
 
 
     def _set_attr_name(self, name):
@@ -69,14 +76,40 @@ class BaseField(object):
 
 
 # Concrete fields
+class StringField(BaseField):
+    def validate_field(self, value):
+        if value and len(value) > 500:
+            return '%(attribute)s has %(len)s characters and it must have less than 500' % \
+                   {'attribute': self._attr, 'len': len(value)}
+
+        return super(StringField, self).validate_field(value)
+
 
 class IntegerField(BaseField):
+    def __init__(self, required=False, default=None, repeated=False, choices=None, lower=None, upper=None):
+        super(IntegerField, self).__init__(required, default, repeated, choices)
+        self.upper = upper
+        self.lower = lower
+
+    def set_options(self, model_property):
+        super(IntegerField, self).set_options(model_property)
+        self.lower = getattr(model_property, 'lower', None)
+        self.upper = getattr(model_property, 'upper', None)
+
+
     def validate_field(self, value):
         try:
             value = self.transform_field(value)
+            if value is not None:
+                if self.lower is not None and self.lower > value:
+                    return '%(attribute)s must be greater than %(lower)s' % \
+                           {'attribute': self._attr, 'lower': self.lower}
+                if self.upper is not None and self.upper < value:
+                    return '%(attribute)s must be less than %(upper)s' % \
+                           {'attribute': self._attr, 'upper': self.upper}
             return super(IntegerField, self).validate_field(value)
         except:
-            return '%s must be integer' % self._attr
+            return '%(attribute)s must be integer' % {'attribute': self._attr}
 
 
     def transform_field(self, value):
@@ -85,6 +118,47 @@ class IntegerField(BaseField):
         elif value is not None:
             value = int(value)
         return super(IntegerField, self).transform_field(value)
+
+
+class DecimalField(BaseField):
+    def __init__(self, required=False, default=None, repeated=False, choices=None, decimal_places=2, lower=None,
+                 upper=None):
+        super(DecimalField, self).__init__(required, default, repeated, choices)
+        self.decimal_places = decimal_places
+        self.__multiplier = (10 ** self.decimal_places)
+        self.upper = self.transform_field(upper)
+        self.lower = self.transform_field(lower)
+
+    def set_options(self, model_property):
+        super(DecimalField, self).set_options(model_property)
+        self.__multiplier = (10 ** model_property.decimal_places)
+        self.decimal_places = model_property.decimal_places
+        self.lower = self.transform_field(getattr(model_property, 'lower', None))
+        self.upper = self.transform_field(getattr(model_property, 'upper', None))
+
+
+    def validate_field(self, value):
+        try:
+            value = self.transform_field(value)
+            if value is not None:
+                if self.lower is not None and self.lower > value:
+                    return '%(attribute)s must be greater than %(lower)s' % \
+                           {'attribute': self._attr, 'lower': self.lower}
+                if self.upper is not None and self.upper < value:
+                    return '%(attribute)s must be less than %(upper)s' % \
+                           {'attribute': self._attr, 'upper': self.upper}
+            return super(DecimalField, self).validate_field(value)
+        except:
+            return '%(attribute)s must be a number' % {'attribute': self._attr}
+
+
+    def transform_field(self, value):
+        if value == '':
+            value = None
+        elif value is not None:
+            rounded = int(round(Decimal(value) * self.__multiplier))
+            value = Decimal(rounded) / self.__multiplier
+        return super(DecimalField, self).transform_field(value)
 
 
 class _ValidatorMetaclass(type):
@@ -113,7 +187,7 @@ class Validator(object):
     def validate(self):
         errors = {}
         for k, v in self._fields.iteritems():
-            error_msg = v.validate(getattr(self, k))
+            error_msg = v.validate(getattr(self, k, None))
             if error_msg:
                 errors[k] = error_msg
         return errors

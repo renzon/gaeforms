@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from google.appengine.ext.ndb.model import IntegerProperty
-from gaevalidator.base import IntegerField, Validator, _ValidatorMetaclass
+from google.appengine.ext.ndb.model import IntegerProperty, StringProperty
+from gaevalidator.base import IntegerField, Validator, _ValidatorMetaclass, DecimalField, StringField
+from ndbext.property import IntegerBounded, SimpleDecimal, SimpleCurrency
 
 _property_to_field_dct = {}
 
@@ -11,6 +12,10 @@ def registry(property_cls, field_cls):
 
 
 registry(IntegerProperty, IntegerField)
+registry(IntegerBounded, IntegerField)
+registry(SimpleDecimal, DecimalField)
+registry(SimpleCurrency, DecimalField)
+registry(StringProperty, StringField)
 
 
 class NotRegisteredProperty(Exception):
@@ -43,13 +48,6 @@ def make_include_function(include, exclude):
     return should_include
 
 
-def set_options(model_property, field):
-    field.required = model_property._required
-    field.default = model_property._default
-    field.repeated = model_property._repeated
-    field.choices = model_property._choices
-    return field
-
 class _ModelValidatorMetaclass(_ValidatorMetaclass):
     def __new__(cls, class_to_be_created_name, bases, attrs):
         model_class = attrs.get('_model_class')
@@ -68,8 +66,9 @@ class _ModelValidatorMetaclass(_ValidatorMetaclass):
                         msg = 'The %s attribute from class %s has a property not registered: %s' % \
                               (k, class_to_be_created_name, v.__class__)
                         raise NotRegisteredProperty(msg)
-
-                    attrs[k] = set_options(v, field_class())
+                    field = field_class()
+                    field.set_options(v)
+                    attrs[k] = field
         return super(_ModelValidatorMetaclass, cls).__new__(cls, class_to_be_created_name, bases, attrs)
 
 
@@ -78,3 +77,11 @@ class ModelValidator(Validator):
     _model_class = None
     _include = None
     _exclude = None
+
+    def populate(self, model=None):
+        transformed_dct = self.transform()
+        if model:
+            model.populate(**transformed_dct)
+            return model
+        return self._model_class(**transformed_dct)
+

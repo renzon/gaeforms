@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+from decimal import Decimal
 import unittest
-from gaevalidator.base import BaseField, Validator, IntegerField
+from gaevalidator.base import BaseField, Validator, IntegerField, DecimalField, StringField
 
 
 def error_msg(attr_name):
@@ -131,3 +132,59 @@ class IntergerFieldTests(unittest.TestCase):
         self.assertEqual('n must be integer', field.validate('foo'))
         self.assertEqual('n must be integer', field.validate('123h'))
         self.assertEqual('n must be integer', field.validate('0x456'))
+
+    def test_validation_lower(self):
+        field = IntegerField(lower=1)
+        field._set_attr_name('n')
+        self.assertIsNone(field.validate('1'))
+        self.assertEqual('n must be greater than 1', field.validate('0'))
+
+    def test_validation_upper(self):
+        field = IntegerField(upper=1)
+        field._set_attr_name('n')
+        self.assertIsNone(field.validate('1'))
+        self.assertEqual('n must be less than 1', field.validate('2'))
+
+
+class SimpleDecimalFieldTests(unittest.TestCase):
+    def test_transformation(self):
+        field = DecimalField()
+        self.assertIsNone(field.transform(None))
+        self.assertIsNone(field.transform(''))
+        self.assertEqual(Decimal('0.00'), field.transform(0))
+        self.assertEqual(Decimal('1.34'), field.transform(1.339999999))
+        self.assertEqual(Decimal('0.00'), field.transform('0'))
+        self.assertEqual(Decimal('1.34'), field.transform('1.34'))
+        field = DecimalField(decimal_places=3)
+        self.assertEqual(Decimal('1.340'), field.transform(1.339999999))
+
+    def test_validation(self):
+        field = DecimalField()
+        field._set_attr_name('n')
+        self.assertIsNone(field.validate(None))
+        self.assertIsNone(field.validate(''))
+        self.assertIsNone(field.validate(0))
+        self.assertIsNone(field.validate(1))
+        self.assertIsNone(field.validate('0'))
+        self.assertIsNone(field.validate('1'))
+        self.assertEqual('n must be a number', field.validate('foo'))
+        self.assertEqual('n must be a number', field.validate('123h'))
+        self.assertEqual('n must be a number', field.validate('0x456'))
+
+    def test_validation_lower(self):
+        field = DecimalField(lower=1)
+        field._set_attr_name('n')
+        self.assertIsNone(field.validate('1'))
+        self.assertEqual('n must be greater than 1', field.validate('0'))
+
+    def test_validation_upper(self):
+        field = DecimalField(upper=1)
+        field._set_attr_name('n')
+        self.assertIsNone(field.validate('1'))
+        self.assertEqual('n must be less than 1', field.validate('2'))
+
+class StringFieldTests(unittest.TestCase):
+    def test_str_with_more_than_500_chars(self):
+        field=StringField()
+        field._set_attr_name('n')
+        self.assertEqual('n has 501 characters and it must have less than 500',field.validate_field('a'*501))
