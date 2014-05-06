@@ -61,7 +61,7 @@ class _ModelValidatorMetaclass(_ValidatorMetaclass):
             should_include = make_include_function(include, exclude)
 
             for k, v in properties.iteritems():
-                if should_include(k):
+                if should_include(k) and k not in attrs:
                     field_class = _property_to_field_dct.get(v.__class__, None)
 
                     if field_class is None:

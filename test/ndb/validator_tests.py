@@ -35,7 +35,17 @@ class ModelValidator(ModelValidator):
     _model_class = ModelMock
 
 
+class ModelValidatorOverriding(ModelValidator):
+    _model_class = ModelMock
+    integer = IntegerField(required=True)
+
+
 class ModelValidatorTests(GAETestCase):
+    def test_overriding(self):
+        validator = ModelValidatorOverriding(integer=0)
+        self.assertDictEqual({}, validator.validate(),
+                               'integer with no bounds should be used once it is overriden on ModelValidatorOverriging')
+
     def test_validate(self):
         validator = ModelValidator(integer=1)
         self.assertDictEqual({}, validator.validate())
