@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import unittest
+import datetime
 from google.appengine.ext import ndb
 from gaevalidator.base import IntegerField
 from gaevalidator.ndb.validator import ModelValidator, InvalidParams
@@ -26,6 +27,8 @@ class ModelMock(ndb.Model):
     currency = SimpleCurrency()
     decimal = SimpleDecimal(decimal_places=3, lower='0.001')
     str = ndb.StringProperty()
+    datetime = ndb.DateTimeProperty()
+    date = ndb.DateProperty()
 
 
 class ModelValidator(ModelValidator):
@@ -43,43 +46,42 @@ class ModelValidatorTests(GAETestCase):
         validator = ModelValidator(integer=1,
                                    decimal='0.001',
                                    currency='0.01',
-                                   str='a')
+                                   str='a',
+                                   datetime='2000/09/30 23:56:56',
+                                   date='1999/08/01')
         self.assertDictEqual({}, validator.validate())
         validator = ModelValidator(integer=0,
                                    decimal='0.0001',
                                    currency='-0.01',
-                                   str='a' * 501)
+                                   str='a' * 501,
+                                   datetime='a/09/30 23:56:56',
+                                   date='1999/08/a1')
         self.assertSetEqual(set(['integer',
                                  'decimal',
                                  'currency',
-                                 'str']),
+                                 'str',
+                                 'datetime',
+                                 'date']),
                             set(validator.validate().keys()))
 
     def test_populate(self):
         validator = ModelValidator(integer=1,
                                    decimal='0.001',
                                    currency='0.01',
-                                   str='a')
+                                   str='a',
+                                   datetime='2000/09/30 23:56:56',
+                                   date='1999/08/01')
         property_dct = {'integer': 1,
                         'decimal': Decimal('0.001'),
                         'currency': Decimal('0.01'),
-                        'str': 'a'}
+                        'str': 'a',
+                        'datetime': datetime.datetime(2000, 9, 30, 23, 56, 56),
+                        'date': datetime.datetime(1999, 8, 1)}
         model = validator.populate()
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         model_key = model.put()
-        validator = ModelValidator(integer=2,
-                                   decimal='3.001',
-                                   currency='4.01',
-                                   str='b')
-        property_dct = {'integer': 2,
-                        'decimal': Decimal('3.001'),
-                        'currency': Decimal('4.01'),
-                        'str': 'b'}
-        validator.populate(model)
-        self.assertIsInstance(model, ModelMock)
-        self.assertDictEqual(property_dct, model.to_dict())
-        self.assertEqual(model_key, model.key)
+
 
 
 class IntegerModelValidatorTests(unittest.TestCase):

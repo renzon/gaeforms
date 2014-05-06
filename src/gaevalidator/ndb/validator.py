@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from google.appengine.ext.ndb.model import IntegerProperty, StringProperty
-from gaevalidator.base import IntegerField, Validator, _ValidatorMetaclass, DecimalField, StringField
+from google.appengine.ext.ndb.model import IntegerProperty, StringProperty,DateTimeProperty,DateProperty
+from gaevalidator.base import IntegerField, Validator, _ValidatorMetaclass, DecimalField, StringField, DateField
 from ndbext.property import IntegerBounded, SimpleDecimal, SimpleCurrency
 
 _property_to_field_dct = {}
@@ -16,6 +16,8 @@ registry(IntegerBounded, IntegerField)
 registry(SimpleDecimal, DecimalField)
 registry(SimpleCurrency, DecimalField)
 registry(StringProperty, StringField)
+registry(DateTimeProperty, DateField)
+registry(DateProperty, DateField)
 
 
 class NotRegisteredProperty(Exception):

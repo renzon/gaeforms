@@ -2,7 +2,8 @@
 from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import unittest
-from gaevalidator.base import BaseField, Validator, IntegerField, DecimalField, StringField
+import datetime
+from gaevalidator.base import BaseField, Validator, IntegerField, DecimalField, StringField, DateField
 
 
 def error_msg(attr_name):
@@ -183,8 +184,29 @@ class SimpleDecimalFieldTests(unittest.TestCase):
         self.assertIsNone(field.validate('1'))
         self.assertEqual('n must be less than 1', field.validate('2'))
 
+
 class StringFieldTests(unittest.TestCase):
     def test_str_with_more_than_500_chars(self):
-        field=StringField()
+        field = StringField()
         field._set_attr_name('n')
-        self.assertEqual('n has 501 characters and it must have less than 500',field.validate_field('a'*501))
+        self.assertEqual('n has 501 characters and it must have less than 500', field.validate_field('a' * 501))
+
+
+class DateFieldTests(unittest.TestCase):
+    def test_default_transformation(self):
+        field = DateField()
+        field._set_attr_name('d')
+        dt = field.transform('2000/09/30')
+        self.assertEqual(datetime.datetime(2000, 9, 30), dt)
+
+    def test_transformation(self):
+        field = DateField(r'%Y/%m/%d %H:%M:%S')
+        field._set_attr_name('d')
+        dt = field.transform('2000/09/30 23:59:59')
+        self.assertEqual(datetime.datetime(2000, 9, 30, 23, 59, 59), dt)
+
+    def test_validate(self):
+        field = DateField(r'%Y/%m/%d %H:%M:%S')
+        field._set_attr_name('d')
+        self.assertIsNone(field.validate('2000/09/30 23:59:59'))
+        self.assertEqual('d must be a date', field.validate('2000/09/30 23:59:a'))

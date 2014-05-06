@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
+import datetime
+from google.appengine.ext.ndb.model import DateTimeProperty, DateProperty
 
 
 class BaseField(object):
@@ -159,6 +161,31 @@ class DecimalField(BaseField):
             rounded = int(round(Decimal(value) * self.__multiplier))
             value = Decimal(rounded) / self.__multiplier
         return super(DecimalField, self).transform_field(value)
+
+
+class DateField(BaseField):
+    def __init__(self, format='%Y/%m/%d', required=False, default=None, repeated=False, choices=None):
+        super(DateField, self).__init__(required, default, repeated, choices)
+        self.format = format
+
+    def transform_field(self, value):
+        if value:
+            return datetime.datetime.strptime(value, self.format)
+        return super(DateField, self).transform_field(value)
+
+    def validate_field(self, value):
+        try:
+            value = self.transform_field(value)
+            return super(DateField, self).validate_field(value)
+        except:
+            return '%(attribute)s must be a date' % {'attribute': self._attr}
+
+    def set_options(self, model_property):
+        super(DateField, self).set_options(model_property)
+        if isinstance(model_property, DateProperty):
+            self.format = '%Y/%m/%d'
+        elif isinstance(model_property, DateTimeProperty):
+            self.format = '%Y/%m/%d %H:%M:%S'
 
 
 class _ValidatorMetaclass(type):

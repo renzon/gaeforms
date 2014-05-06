@@ -104,7 +104,7 @@ def find_package_data(
 
 
 PACKAGE = "gaevalidator"
-DESCRIPTION = "A automate validation based on App Engine Models"
+DESCRIPTION = "A automated validation based on App Engine Models"
 NAME = PACKAGE
 AUTHOR = "Renzo Nuccitelli"
 AUTHOR_EMAIL = "renzo.n@gmail.com"
