@@ -81,7 +81,22 @@ class ModelValidatorTests(GAETestCase):
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         model_key = model.put()
-
+        validator = ModelValidator(integer=2,
+                                   decimal='3.001',
+                                   currency='4.01',
+                                   str='b',
+                                   datetime='2000/09/30 23:56:56',
+                                   date='1999/08/01')
+        property_dct = {'integer': 2,
+                        'decimal': Decimal('3.001'),
+                        'currency': Decimal('4.01'),
+                        'str': 'b',
+                        'datetime': datetime.datetime(2000, 9, 30, 23, 56, 56),
+                        'date': datetime.datetime(1999, 8, 1)}
+        validator.populate(model)
+        self.assertIsInstance(model, ModelMock)
+        self.assertDictEqual(property_dct, model.to_dict())
+        self.assertEqual(model_key, model.key)
 
 
 class IntegerModelValidatorTests(unittest.TestCase):
