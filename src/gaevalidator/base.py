@@ -169,7 +169,7 @@ class DateField(BaseField):
         self.format = format
 
     def transform_field(self, value):
-        if value:
+        if isinstance(value,basestring):
             return datetime.datetime.strptime(value, self.format)
         return super(DateField, self).transform_field(value)
 

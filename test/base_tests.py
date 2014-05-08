@@ -210,3 +210,10 @@ class DateFieldTests(unittest.TestCase):
         field._set_attr_name('d')
         self.assertIsNone(field.validate('2000/09/30 23:59:59'))
         self.assertEqual('d must be a date', field.validate('2000/09/30 23:59:a'))
+
+    def test_date_assignment(self):
+        field = DateField()
+        field._set_attr_name('d')
+        date = datetime.datetime(2000, 9, 30)
+        dt = field.transform(date)
+        self.assertEqual(date, dt)
