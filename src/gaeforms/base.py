@@ -59,6 +59,13 @@ class BaseField(object):
                 value = None
         return self.validate_field(value)
 
+    def __execute_one_or_repeated(self, fcn, value):
+        if self.repeated:
+            if value:
+                return [fcn(v) for v in value]
+            return []
+        return fcn(value)
+
     def normalize(self, value):
         """
         Normalizes a value to be stored on db. Transforms string from web requests on db object, removing any
@@ -66,11 +73,7 @@ class BaseField(object):
         :param value: value to be normalize
         :return: a dict with normalized values
         """
-        if self.repeated:
-            if value:
-                return [self.normalize_field(v) for v in value]
-            return []
-        return self.normalize_field(value)
+        return self.__execute_one_or_repeated(self.normalize_field, value)
 
     def normalize_field(self, value):
         """
