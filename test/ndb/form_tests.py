@@ -87,7 +87,7 @@ class ModelFormTests(GAETestCase):
                         'str': 'a',
                         'datetime': datetime.datetime(2000, 9, 30, 23, 56, 56),
                         'date': datetime.datetime(1999, 8, 1)}
-        model = model_form.populate()
+        model = model_form.populate_model()
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         model_key = model.put()
@@ -103,7 +103,7 @@ class ModelFormTests(GAETestCase):
                         'str': 'b',
                         'datetime': datetime.datetime(2000, 9, 30, 23, 56, 56),
                         'date': datetime.datetime(1999, 8, 1)}
-        model_form.populate(model)
+        model_form.populate_model(model)
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         self.assertEqual(model_key, model.key)

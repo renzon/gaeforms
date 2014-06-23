@@ -3,7 +3,13 @@ from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import unittest
 import datetime
+
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField
+
+from gaeforms import base
+
+# Mocking i18n
+base._ = lambda k: k
 
 
 def error_msg(attr_name):
@@ -58,12 +64,14 @@ class FormTests(unittest.TestCase):
 class BaseFieldTests(unittest.TestCase):
     def test_required(self):
         field_not_required = BaseField()
+
         self.assertIsNone(None, field_not_required.validate(''))
         self.assertIsNone(field_not_required.validate(None))
         self.assertIsNone(field_not_required.validate('Foo'))
         field_required = BaseField(required=True)
-        self.assertIsNotNone(field_required.validate(''))
-        self.assertIsNotNone(field_required.validate(None))
+        field_required._attr = 'req'
+        self.assertEqual('req is required', field_required.validate(''))
+        self.assertEqual('req is required', field_required.validate(None))
         self.assertIsNone(field_required.validate('Foo'))
 
     def test_default(self):
@@ -85,9 +93,11 @@ class BaseFieldTests(unittest.TestCase):
 
     def test_choices(self):
         field = BaseField(choices=['1', '2'])
+        field._attr = 'foo'
         self.assertIsNone(field.validate('1'))
         self.assertIsNone(field.validate('2'))
-        self.assertIsNotNone(field.validate(None))
+        self.assertEqual('foo must be one of: 1; 2', field.validate(None))
+
 
     def test_repeated(self):
         field = BaseField(repeated=True)
@@ -99,12 +109,14 @@ class BaseFieldTests(unittest.TestCase):
 
     def test_repeated_plus_required(self):
         field = BaseField(repeated=True, required=True)
+        field._attr='req'
+
         self.assertIsNone(field.validate(['1']))
         self.assertIsNone(field.validate(['1', '2']))
-        self.assertIsNotNone(field.validate(None))
-        self.assertIsNotNone(field.validate([None]))
-        self.assertIsNotNone(field.validate([]))
-        self.assertIsNotNone(field.validate(['1,', None]))
+        self.assertEqual('req is required', field.validate(None))
+        self.assertEqual('req is required', field.validate([None]))
+        self.assertEqual('req is required', field.validate([]))
+        self.assertEqual('req is required', field.validate(['1,', None]))
 
     def test_repeated_normalization(self):
         field = MockField(repeated=True)

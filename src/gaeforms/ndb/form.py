@@ -80,10 +80,27 @@ class ModelForm(Form):
     _include = None
     _exclude = None
 
-    def populate(self, model=None):
-        transformed_dct = self.normalize()
+    def populate_model(self, model=None):
+        """
+        Populates a model with normalized properties. If no model is provided (None) a new one will be created.
+        :param model: model to be populade
+        :return: populated model
+        """
+        normalized_dct = self.normalize()
         if model:
-            model.populate(**transformed_dct)
+            model.populate(**normalized_dct)
             return model
-        return self._model_class(**transformed_dct)
+        return self._model_class(**normalized_dct)
+
+    def populate_form(self, model=None):
+        """
+        Populates this form with localized properties from model.
+        :param model: model
+        :return: populated model
+        """
+        normalized_dct = self.normalize()
+        if model:
+            model.populate(**normalized_dct)
+            return model
+        return self._model_class(**normalized_dct)
 

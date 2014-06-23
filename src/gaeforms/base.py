@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import datetime
 from google.appengine.ext.ndb.model import DateTimeProperty, DateProperty
+from webapp2_extras.i18n import gettext as _
 
 
 class BaseField(object):
@@ -37,12 +38,13 @@ class BaseField(object):
             value = self.normalize_field(value)
             if value in self.choices:
                 return None
-            return '%s should be one of %s' % (self._attr, self.choices)
+            return _('%(attribute)s must be one of: %(choices)s') % {'attribute': self._attr,
+                                                                     'choices': '; '.join(self.choices)}
         if self.default is not None:
             if value is None or value == '':
                 value = self.default
         if self.required and (value is None or value == ''):
-            return '%s is required' % self._attr
+            return _('%(attribute)s is required') % {'attribute': self._attr}
 
 
     def __get__(self, instance, owner):
@@ -71,7 +73,7 @@ class BaseField(object):
         Normalizes a value to be stored on db. Transforms string from web requests on db object, removing any
         localization
         :param value: value to be normalize
-        :return: a dict with normalized values
+        :return: a normalized value
         """
         return self._execute_one_or_repeated(self.normalize_field, value)
 
@@ -86,12 +88,31 @@ class BaseField(object):
                 value = self.default
         return value
 
+    def localize(self, value):
+        """
+        Localizes a value to be sent to clients. Transforms object on localized strings. Must make the opposite of
+        normalizes
+        :param value: value to be localized
+        :return: a localized value
+        """
+        return self._execute_one_or_repeated(self.localize_field, value)
+
+    def localize_field(self, value):
+        """
+        Method that must transform the value from object to localized string
+
+        """
+        if self.default is not None:
+            if value is None or value == '':
+                value = self.default
+        return value
+
 
 # Concrete fields
 class StringField(BaseField):
     def validate_field(self, value):
         if value and len(value) > 500:
-            return '%(attribute)s has %(len)s characters and it must have less than 500' % \
+            return _('%(attribute)s has %(len)s characters and it must have less than 500') % \
                    {'attribute': self._attr, 'len': len(value)}
 
         return super(StringField, self).validate_field(value)
@@ -114,14 +135,14 @@ class IntegerField(BaseField):
             value = self.normalize_field(value)
             if value is not None:
                 if self.lower is not None and self.lower > value:
-                    return '%(attribute)s must be greater than %(lower)s' % \
-                           {'attribute': self._attr, 'lower': self.lower}
+                    return _('%(attribute)s must be greater than %(lower)s') % {'attribute': self._attr,
+                                                                                'lower': self.lower}
                 if self.upper is not None and self.upper < value:
-                    return '%(attribute)s must be less than %(upper)s' % \
-                           {'attribute': self._attr, 'upper': self.upper}
+                    return _('%(attribute)s must be less than %(upper)s') % {'attribute': self._attr,
+                                                                             'upper': self.upper}
             return super(IntegerField, self).validate_field(value)
         except:
-            return '%(attribute)s must be integer' % {'attribute': self._attr}
+            return _('%(attribute)s must be integer') % {'attribute': self._attr}
 
 
     def normalize_field(self, value):
@@ -154,14 +175,14 @@ class DecimalField(BaseField):
             value = self.normalize_field(value)
             if value is not None:
                 if self.lower is not None and self.lower > value:
-                    return '%(attribute)s must be greater than %(lower)s' % \
-                           {'attribute': self._attr, 'lower': self.lower}
+                    return _('%(attribute)s must be greater than %(lower)s') % {'attribute': self._attr,
+                                                                                'lower': self.lower}
                 if self.upper is not None and self.upper < value:
-                    return '%(attribute)s must be less than %(upper)s' % \
-                           {'attribute': self._attr, 'upper': self.upper}
+                    return _('%(attribute)s must be less than %(upper)s') % {'attribute': self._attr,
+                                                                             'upper': self.upper}
             return super(DecimalField, self).validate_field(value)
         except:
-            return '%(attribute)s must be a number' % {'attribute': self._attr}
+            return _('%(attribute)s must be a number') % {'attribute': self._attr}
 
 
     def normalize_field(self, value):
@@ -188,7 +209,7 @@ class DateField(BaseField):
             value = self.normalize_field(value)
             return super(DateField, self).validate_field(value)
         except:
-            return '%(attribute)s must be a date' % {'attribute': self._attr}
+            return _('%(attribute)s must be a date') % {'attribute': self._attr}
 
     def set_options(self, model_property):
         super(DateField, self).set_options(model_property)
