@@ -4,12 +4,12 @@ from decimal import Decimal
 import unittest
 import datetime
 
-from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField
-
 from gaeforms import base
 
 # Mocking i18n
 base._ = lambda k: k
+
+from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField
 
 
 def error_msg(attr_name):
@@ -23,6 +23,9 @@ class MockField(BaseField):
 
     def normalize_field(self, value):
         return int(value)
+
+    def localize_field(self, value):
+        return {1: 'one', 2: 'two'}.get(value)
 
 
 mock1 = MockField()
@@ -59,6 +62,13 @@ class FormTests(unittest.TestCase):
     def test_normalize(self):
         v1 = FormExample(attr1='1', attr2='2')
         self.assertDictEqual({'attr1': 1, 'attr2': 2}, v1.normalize())
+
+    def test_localize(self):
+        v1 = FormExample()
+        self.assertFalse(hasattr(v1, 'attr1'))
+        self.assertFalse(hasattr(v1, 'attr2'))
+        self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, v1.localize(attr1=1, attr2=2))
+        self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, {'attr1': v1.attr1, 'attr2': v1.attr2})
 
 
 class BaseFieldTests(unittest.TestCase):
@@ -109,7 +119,7 @@ class BaseFieldTests(unittest.TestCase):
 
     def test_repeated_plus_required(self):
         field = BaseField(repeated=True, required=True)
-        field._attr='req'
+        field._attr = 'req'
 
         self.assertIsNone(field.validate(['1']))
         self.assertIsNone(field.validate(['1', '2']))

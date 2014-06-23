@@ -54,18 +54,18 @@ class ModelFormTests(GAETestCase):
         validator = ModelFormMock(integer=0)
         self.assertSetEqual(set(['integer']), set(validator.validate().keys()))
         validator = ModelFormMock(integer=1,
-                              decimal='0.001',
-                              currency='0.01',
-                              str='a',
-                              datetime='2000/09/30 23:56:56',
-                              date='1999/08/01')
+                                  decimal='0.001',
+                                  currency='0.01',
+                                  str='a',
+                                  datetime='2000/09/30 23:56:56',
+                                  date='1999/08/01')
         self.assertDictEqual({}, validator.validate())
         validator = ModelFormMock(integer=0,
-                              decimal='0.0001',
-                              currency='-0.01',
-                              str='a' * 501,
-                              datetime='a/09/30 23:56:56',
-                              date='1999/08/a1')
+                                  decimal='0.0001',
+                                  currency='-0.01',
+                                  str='a' * 501,
+                                  datetime='a/09/30 23:56:56',
+                                  date='1999/08/a1')
         self.assertSetEqual(set(['integer',
                                  'decimal',
                                  'currency',
@@ -74,13 +74,13 @@ class ModelFormTests(GAETestCase):
                                  'date']),
                             set(validator.validate().keys()))
 
-    def test_populate(self):
+    def test_populate_model(self):
         model_form = ModelFormMock(integer=1,
-                              decimal='0.001',
-                              currency='0.01',
-                              str='a',
-                              datetime='2000/09/30 23:56:56',
-                              date='1999/08/01')
+                                   decimal='0.001',
+                                   currency='0.01',
+                                   str='a',
+                                   datetime='2000/09/30 23:56:56',
+                                   date='1999/08/01')
         property_dct = {'integer': 1,
                         'decimal': Decimal('0.001'),
                         'currency': Decimal('0.01'),
@@ -92,11 +92,11 @@ class ModelFormTests(GAETestCase):
         self.assertDictEqual(property_dct, model.to_dict())
         model_key = model.put()
         model_form = ModelFormMock(integer=2,
-                              decimal='3.001',
-                              currency='4.01',
-                              str='b',
-                              datetime='2000/09/30 23:56:56',
-                              date='1999/08/01')
+                                   decimal='3.001',
+                                   currency='4.01',
+                                   str='b',
+                                   datetime='2000/09/30 23:56:56',
+                                   date='1999/08/01')
         property_dct = {'integer': 2,
                         'decimal': Decimal('3.001'),
                         'currency': Decimal('4.01'),
@@ -107,6 +107,22 @@ class ModelFormTests(GAETestCase):
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         self.assertEqual(model_key, model.key)
+
+    def test_populate_form(self):
+        model_form = ModelFormMock()
+        model = ModelMock(integer=1,
+                          decimal=Decimal('0.001'),
+                          currency=Decimal('0.01'),
+                          str='a',
+                          datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
+                          date=datetime.datetime(1999, 8, 1))
+        model_form.populate_form(model)
+        self.assertDictEqual({'integer': '1',
+                              'decimal': '0.001',
+                              'currency': '0.01',
+                              'str': 'a',
+                              'datetime': '2000/09/30 23:56:56',
+                              'date': '1999/08/01'}, model.to_dict())
 
 
 class IntegerModelValidatorTests(unittest.TestCase):

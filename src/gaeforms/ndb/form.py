@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from google.appengine.ext.ndb.model import IntegerProperty, StringProperty,DateTimeProperty,DateProperty
+from google.appengine.ext.ndb.model import IntegerProperty, StringProperty, DateTimeProperty, DateProperty
 from gaeforms.base import IntegerField, Form, _FormMetaclass, DecimalField, StringField, DateField
 from ndbext.property import IntegerBounded, SimpleDecimal, SimpleCurrency
 
@@ -92,15 +92,12 @@ class ModelForm(Form):
             return model
         return self._model_class(**normalized_dct)
 
-    def populate_form(self, model=None):
+    def populate_form(self, model):
         """
         Populates this form with localized properties from model.
         :param model: model
-        :return: populated model
+        :return: dict with localized properties
         """
-        normalized_dct = self.normalize()
-        if model:
-            model.populate(**normalized_dct)
-            return model
-        return self._model_class(**normalized_dct)
+        model_dct = model.to_dict(include=self._fields.keys())
+        return self.localize(**model_dct)
 

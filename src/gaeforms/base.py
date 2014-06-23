@@ -105,7 +105,7 @@ class BaseField(object):
         if self.default is not None:
             if value is None or value == '':
                 value = self.default
-        return value
+        return value or ''
 
 
 # Concrete fields
@@ -252,6 +252,15 @@ class Form(object):
 
     def normalize(self):
         return {k: v.normalize(getattr(self, k)) for k, v in self._fields.iteritems()}
+
+    def localize(self, **obj_values):
+        def _localize(k, descriptor):
+            value = obj_values.get(k)
+            if value:
+                setattr(self, k, descriptor.localize(value))
+            return getattr(self, k)
+
+        return {k: _localize(k, v) for k, v in self._fields.iteritems()}
 
 
 
