@@ -3,13 +3,17 @@ from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import unittest
 import datetime
-
-from gaeforms import base
-
-# Mocking i18n
-base._ = lambda k: k
-
+import webapp2
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField
+
+app = webapp2.WSGIApplication(
+        [webapp2.Route('/', None, name='upload_handler')])
+
+request = webapp2.Request({'SERVER_NAME':'test', 'SERVER_PORT':80,
+    'wsgi.url_scheme':'http'})
+request.app = app
+app.set_globals(app=app, request=request)
+
 
 
 def error_msg(attr_name):
@@ -138,8 +142,6 @@ class IntergerFieldTests(unittest.TestCase):
         field = IntegerField()
         self.assertIsNone(field.normalize(None))
         self.assertIsNone(field.normalize(''))
-        self.assertEqual(0, field.normalize(0))
-        self.assertEqual(1, field.normalize(1))
         self.assertEqual(0, field.normalize('0'))
         self.assertEqual(1, field.normalize('1'))
 
@@ -148,8 +150,6 @@ class IntergerFieldTests(unittest.TestCase):
         field._set_attr_name('n')
         self.assertIsNone(field.validate(None))
         self.assertIsNone(field.validate(''))
-        self.assertIsNone(field.validate(0))
-        self.assertIsNone(field.validate(1))
         self.assertIsNone(field.validate('0'))
         self.assertIsNone(field.validate('1'))
         self.assertEqual('n must be integer', field.validate('foo'))

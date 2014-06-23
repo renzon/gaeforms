@@ -4,6 +4,7 @@ from decimal import Decimal
 import datetime
 from google.appengine.ext.ndb.model import DateTimeProperty, DateProperty
 from webapp2_extras.i18n import gettext as _
+from webapp2_extras import i18n
 
 
 class BaseField(object):
@@ -112,8 +113,8 @@ class BaseField(object):
 class StringField(BaseField):
     def validate_field(self, value):
         if value and len(value) > 500:
-            return _('%(attribute)s has %(len)s characters and it must have less than 500') % \
-                   {'attribute': self._attr, 'len': len(value)}
+            return _('%(attribute)s has %(len)s characters and it must have less than 500') % {'attribute': self._attr,
+                                                                                               'len': len(value)}
 
         return super(StringField, self).validate_field(value)
 
@@ -129,7 +130,6 @@ class IntegerField(BaseField):
         self.lower = getattr(model_property, 'lower', None)
         self.upper = getattr(model_property, 'upper', None)
 
-
     def validate_field(self, value):
         try:
             value = self.normalize_field(value)
@@ -144,13 +144,16 @@ class IntegerField(BaseField):
         except:
             return _('%(attribute)s must be integer') % {'attribute': self._attr}
 
-
     def normalize_field(self, value):
         if value == '':
             value = None
         elif value is not None:
-            value = int(value)
+            value = int(i18n.get_i18n().parse_number(value))
         return super(IntegerField, self).normalize_field(value)
+
+    def localize_field(self, value):
+        if value:
+            return i18n.get_i18n().format_number(value)
 
 
 class DecimalField(BaseField):
