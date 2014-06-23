@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import unittest
 import datetime
-from gaevalidator.base import BaseField, Validator, IntegerField, DecimalField, StringField, DateField
+from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField
 
 
 def error_msg(attr_name):
@@ -23,7 +23,7 @@ mock1 = MockField()
 mock2 = MockField()
 
 
-class ValidatorExample(Validator):
+class FormExample(Form):
     attr1 = mock1
     attr2 = mock2
     non_field = 'foo'
@@ -31,27 +31,27 @@ class ValidatorExample(Validator):
 
 class ValidatorTests(unittest.TestCase):
     def test_fields(self):
-        self.assertDictEqual({'attr1': mock1, 'attr2': mock2}, ValidatorExample._fields)
+        self.assertDictEqual({'attr1': mock1, 'attr2': mock2}, FormExample._fields)
 
     def test_instance_values(self):
-        v1 = ValidatorExample(attr1='a', attr2='b')
-        v2 = ValidatorExample(attr1='c', attr2='d')
+        v1 = FormExample(attr1='a', attr2='b')
+        v2 = FormExample(attr1='c', attr2='d')
         self.assertTupleEqual(('a', 'b'), (v1.attr1, v1.attr2))
         self.assertTupleEqual(('c', 'd'), (v2.attr1, v2.attr2))
 
 
     def test_validate(self):
-        v1 = ValidatorExample(attr1=True, attr2=True)
+        v1 = FormExample(attr1=True, attr2=True)
         self.assertDictEqual({}, v1.validate())
-        v1 = ValidatorExample(attr1=False, attr2=True)
+        v1 = FormExample(attr1=False, attr2=True)
         self.assertDictEqual({'attr1': error_msg('attr1')}, v1.validate())
-        v1 = ValidatorExample(attr1=True, attr2=False)
+        v1 = FormExample(attr1=True, attr2=False)
         self.assertDictEqual({'attr2': error_msg('attr2')}, v1.validate())
-        v1 = ValidatorExample(attr1=False, attr2=False)
+        v1 = FormExample(attr1=False, attr2=False)
         self.assertDictEqual({'attr1': error_msg('attr1'), 'attr2': error_msg('attr2')}, v1.validate())
 
     def test_transform(self):
-        v1 = ValidatorExample(attr1='1', attr2='2')
+        v1 = FormExample(attr1='1', attr2='2')
         self.assertDictEqual({'attr1': 1, 'attr2': 2}, v1.transform())
 
 

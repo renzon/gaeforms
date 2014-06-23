@@ -188,7 +188,7 @@ class DateField(BaseField):
             self.format = '%Y/%m/%d %H:%M:%S'
 
 
-class _ValidatorMetaclass(type):
+class _FormMetaclass(type):
     def __new__(cls, class_to_be_created_name, bases, attrs):
         def set_descriptor_attr_name(descriptor, name):
             descriptor._set_attr_name(name)
@@ -200,12 +200,12 @@ class _ValidatorMetaclass(type):
 
         attrs['_fields'] = {d._attr: d for d in descriptors}
 
-        return super(_ValidatorMetaclass, cls).__new__(cls, class_to_be_created_name, bases, attrs)
+        return super(_FormMetaclass, cls).__new__(cls, class_to_be_created_name, bases, attrs)
 
 
-class Validator(object):
+class Form(object):
     _fields = ()
-    __metaclass__ = _ValidatorMetaclass
+    __metaclass__ = _FormMetaclass
 
     def __init__(self, **kwargs):
         for k, v in kwargs.iteritems():

@@ -4,8 +4,8 @@ from decimal import Decimal
 import unittest
 import datetime
 from google.appengine.ext import ndb
-from gaevalidator.base import IntegerField
-from gaevalidator.ndb.validator import ModelValidator, InvalidParams
+from gaeforms.base import IntegerField
+from gaeforms.ndb.form import ModelForm, InvalidParams
 from ndbext.property import IntegerBounded, SimpleCurrency, SimpleDecimal
 from util import GAETestCase
 
@@ -18,7 +18,7 @@ class IntegerModelMock(ndb.Model):
     integer_default = ndb.IntegerProperty(default=0)
 
 
-class IntegerModelValidator(ModelValidator):
+class IntegerModelForm(ModelForm):
     _model_class = IntegerModelMock
 
 
@@ -31,41 +31,41 @@ class ModelMock(ndb.Model):
     date = ndb.DateProperty()
 
 
-class ModelValidator(ModelValidator):
+class ModelFormMock(ModelForm):
     _model_class = ModelMock
 
 
-class ModelValidatorOverriding(ModelValidator):
+class ModelFormOverriding(ModelForm):
     _model_class = ModelMock
     integer = IntegerField(required=True)
 
 
-class ModelValidatorTests(GAETestCase):
+class ModelFormTests(GAETestCase):
     def test_overriding(self):
-        validator = ModelValidatorOverriding(integer=0)
+        validator = ModelFormOverriding(integer=0)
         self.assertDictEqual({}, validator.validate(),
                                'integer with no bounds should be used once it is overriden on ModelValidatorOverriging')
 
     def test_validate(self):
-        validator = ModelValidator(integer=1)
+        validator = ModelFormMock(integer=1)
         self.assertDictEqual({}, validator.validate())
-        validator = ModelValidator()
+        validator = ModelFormMock()
         self.assertSetEqual(set(['integer']), set(validator.validate().keys()))
-        validator = ModelValidator(integer=0)
+        validator = ModelFormMock(integer=0)
         self.assertSetEqual(set(['integer']), set(validator.validate().keys()))
-        validator = ModelValidator(integer=1,
-                                   decimal='0.001',
-                                   currency='0.01',
-                                   str='a',
-                                   datetime='2000/09/30 23:56:56',
-                                   date='1999/08/01')
+        validator = ModelFormMock(integer=1,
+                              decimal='0.001',
+                              currency='0.01',
+                              str='a',
+                              datetime='2000/09/30 23:56:56',
+                              date='1999/08/01')
         self.assertDictEqual({}, validator.validate())
-        validator = ModelValidator(integer=0,
-                                   decimal='0.0001',
-                                   currency='-0.01',
-                                   str='a' * 501,
-                                   datetime='a/09/30 23:56:56',
-                                   date='1999/08/a1')
+        validator = ModelFormMock(integer=0,
+                              decimal='0.0001',
+                              currency='-0.01',
+                              str='a' * 501,
+                              datetime='a/09/30 23:56:56',
+                              date='1999/08/a1')
         self.assertSetEqual(set(['integer',
                                  'decimal',
                                  'currency',
@@ -75,35 +75,35 @@ class ModelValidatorTests(GAETestCase):
                             set(validator.validate().keys()))
 
     def test_populate(self):
-        validator = ModelValidator(integer=1,
-                                   decimal='0.001',
-                                   currency='0.01',
-                                   str='a',
-                                   datetime='2000/09/30 23:56:56',
-                                   date='1999/08/01')
+        model_form = ModelFormMock(integer=1,
+                              decimal='0.001',
+                              currency='0.01',
+                              str='a',
+                              datetime='2000/09/30 23:56:56',
+                              date='1999/08/01')
         property_dct = {'integer': 1,
                         'decimal': Decimal('0.001'),
                         'currency': Decimal('0.01'),
                         'str': 'a',
                         'datetime': datetime.datetime(2000, 9, 30, 23, 56, 56),
                         'date': datetime.datetime(1999, 8, 1)}
-        model = validator.populate()
+        model = model_form.populate()
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         model_key = model.put()
-        validator = ModelValidator(integer=2,
-                                   decimal='3.001',
-                                   currency='4.01',
-                                   str='b',
-                                   datetime='2000/09/30 23:56:56',
-                                   date='1999/08/01')
+        model_form = ModelFormMock(integer=2,
+                              decimal='3.001',
+                              currency='4.01',
+                              str='b',
+                              datetime='2000/09/30 23:56:56',
+                              date='1999/08/01')
         property_dct = {'integer': 2,
                         'decimal': Decimal('3.001'),
                         'currency': Decimal('4.01'),
                         'str': 'b',
                         'datetime': datetime.datetime(2000, 9, 30, 23, 56, 56),
                         'date': datetime.datetime(1999, 8, 1)}
-        validator.populate(model)
+        model_form.populate(model)
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         self.assertEqual(model_key, model.key)
@@ -113,14 +113,14 @@ class IntegerModelValidatorTests(unittest.TestCase):
     def test_fields(self):
         properties = ['integer', 'integer_required', 'integer_repeated',
                       'integer_choices', 'integer_default']
-        self.assertSetEqual(set(properties), set(IntegerModelValidator._fields.iterkeys()))
+        self.assertSetEqual(set(properties), set(IntegerModelForm._fields.iterkeys()))
         for p in properties:
-            self.assertIsInstance(IntegerModelValidator._fields[p], IntegerField)
+            self.assertIsInstance(IntegerModelForm._fields[p], IntegerField)
 
     def test_include(self):
         properties = ['integer', 'integer_required']
 
-        class IntegerInclude(ModelValidator):
+        class IntegerInclude(ModelForm):
             _model_class = IntegerModelMock
             _include = (IntegerModelMock.integer, IntegerModelMock.integer_required)
 
@@ -131,7 +131,7 @@ class IntegerModelValidatorTests(unittest.TestCase):
     def test_exclude(self):
         properties = ['integer_repeated', 'integer_choices', 'integer_default']
 
-        class IntegerInclude(ModelValidator):
+        class IntegerInclude(ModelForm):
             _model_class = IntegerModelMock
             _exclude = (IntegerModelMock.integer, IntegerModelMock.integer_required)
 
@@ -142,7 +142,7 @@ class IntegerModelValidatorTests(unittest.TestCase):
     def test_include_exclude_definition_error(self):
 
         def f():
-            class IntegerInclude(ModelValidator):
+            class IntegerInclude(ModelForm):
                 _model_class = IntegerModelMock
                 _exclude = (IntegerModelMock.integer, IntegerModelMock.integer_required)
                 _include = (IntegerModelMock.integer, IntegerModelMock.integer_required)
@@ -150,8 +150,8 @@ class IntegerModelValidatorTests(unittest.TestCase):
         self.assertRaises(InvalidParams, f)
 
     def test_property_options(self):
-        self.assertTrue(IntegerModelValidator._fields['integer_required'].required)
-        self.assertTrue(IntegerModelValidator._fields['integer_repeated'].repeated)
-        self.assertSetEqual(frozenset([1, 2]), IntegerModelValidator._fields['integer_choices'].choices)
-        self.assertEqual(0, IntegerModelValidator._fields['integer_default'].default)
+        self.assertTrue(IntegerModelForm._fields['integer_required'].required)
+        self.assertTrue(IntegerModelForm._fields['integer_repeated'].repeated)
+        self.assertSetEqual(frozenset([1, 2]), IntegerModelForm._fields['integer_choices'].choices)
+        self.assertEqual(0, IntegerModelForm._fields['integer_default'].default)
 

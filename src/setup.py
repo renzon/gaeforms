@@ -103,12 +103,12 @@ def find_package_data(
     return out
 
 
-PACKAGE = "gaevalidator"
+PACKAGE = "gaeforms"
 DESCRIPTION = "A automated validation based on App Engine Models"
 NAME = PACKAGE
 AUTHOR = "Renzo Nuccitelli"
 AUTHOR_EMAIL = "renzo.n@gmail.com"
-URL = "https://github.com/renzon/gavalidator"
+URL = "https://github.com/renzon/gaeforms"
 VERSION = __import__(PACKAGE).__version__
 
 

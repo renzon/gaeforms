@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 from google.appengine.ext.ndb.model import IntegerProperty, StringProperty,DateTimeProperty,DateProperty
-from gaevalidator.base import IntegerField, Validator, _ValidatorMetaclass, DecimalField, StringField, DateField
+from gaeforms.base import IntegerField, Form, _FormMetaclass, DecimalField, StringField, DateField
 from ndbext.property import IntegerBounded, SimpleDecimal, SimpleCurrency
 
 _property_to_field_dct = {}
@@ -50,7 +50,7 @@ def make_include_function(include, exclude):
     return should_include
 
 
-class _ModelValidatorMetaclass(_ValidatorMetaclass):
+class _ModelFormMetaclass(_FormMetaclass):
     def __new__(cls, class_to_be_created_name, bases, attrs):
         model_class = attrs.get('_model_class')
         if model_class:
@@ -71,11 +71,11 @@ class _ModelValidatorMetaclass(_ValidatorMetaclass):
                     field = field_class()
                     field.set_options(v)
                     attrs[k] = field
-        return super(_ModelValidatorMetaclass, cls).__new__(cls, class_to_be_created_name, bases, attrs)
+        return super(_ModelFormMetaclass, cls).__new__(cls, class_to_be_created_name, bases, attrs)
 
 
-class ModelValidator(Validator):
-    __metaclass__ = _ModelValidatorMetaclass
+class ModelForm(Form):
+    __metaclass__ = _ModelFormMetaclass
     _model_class = None
     _include = None
     _exclude = None
