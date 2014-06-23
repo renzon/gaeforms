@@ -15,7 +15,7 @@ class MockField(BaseField):
         if not value:
             return error_msg(self._attr)
 
-    def transform_field(self, value):
+    def normalize_field(self, value):
         return int(value)
 
 
@@ -69,16 +69,16 @@ class BaseFieldTests(unittest.TestCase):
     def test_default(self):
         DEFAULT = 'default'
         field = BaseField(default=DEFAULT)
-        self.assertEqual(DEFAULT, field.transform(''))
-        self.assertEqual(DEFAULT, field.transform(None))
-        self.assertEqual("X", field.transform('X'))
+        self.assertEqual(DEFAULT, field.normalize(''))
+        self.assertEqual(DEFAULT, field.normalize(None))
+        self.assertEqual("X", field.normalize('X'))
 
     def test_default_plus_required(self):
         DEFAULT = 'default'
         field = BaseField(default=DEFAULT, required=True)
-        self.assertEqual(DEFAULT, field.transform(''))
-        self.assertEqual(DEFAULT, field.transform(None))
-        self.assertEqual("X", field.transform('X'))
+        self.assertEqual(DEFAULT, field.normalize(''))
+        self.assertEqual(DEFAULT, field.normalize(None))
+        self.assertEqual("X", field.normalize('X'))
         self.assertIsNone(None, field.validate(''))
         self.assertIsNone(field.validate(None))
         self.assertIsNone(field.validate('X'))
@@ -108,18 +108,18 @@ class BaseFieldTests(unittest.TestCase):
 
     def test_repeated_transformation(self):
         field = MockField(repeated=True)
-        self.assertListEqual([1, 2, 3], field.transform(['1', '2', '3']))
+        self.assertListEqual([1, 2, 3], field.normalize(['1', '2', '3']))
 
 
 class IntergerFieldTests(unittest.TestCase):
     def test_transformation(self):
         field = IntegerField()
-        self.assertIsNone(field.transform(None))
-        self.assertIsNone(field.transform(''))
-        self.assertEqual(0, field.transform(0))
-        self.assertEqual(1, field.transform(1))
-        self.assertEqual(0, field.transform('0'))
-        self.assertEqual(1, field.transform('1'))
+        self.assertIsNone(field.normalize(None))
+        self.assertIsNone(field.normalize(''))
+        self.assertEqual(0, field.normalize(0))
+        self.assertEqual(1, field.normalize(1))
+        self.assertEqual(0, field.normalize('0'))
+        self.assertEqual(1, field.normalize('1'))
 
     def test_validation(self):
         field = IntegerField()
@@ -150,14 +150,14 @@ class IntergerFieldTests(unittest.TestCase):
 class SimpleDecimalFieldTests(unittest.TestCase):
     def test_transformation(self):
         field = DecimalField()
-        self.assertIsNone(field.transform(None))
-        self.assertIsNone(field.transform(''))
-        self.assertEqual(Decimal('0.00'), field.transform(0))
-        self.assertEqual(Decimal('1.34'), field.transform(1.339999999))
-        self.assertEqual(Decimal('0.00'), field.transform('0'))
-        self.assertEqual(Decimal('1.34'), field.transform('1.34'))
+        self.assertIsNone(field.normalize(None))
+        self.assertIsNone(field.normalize(''))
+        self.assertEqual(Decimal('0.00'), field.normalize(0))
+        self.assertEqual(Decimal('1.34'), field.normalize(1.339999999))
+        self.assertEqual(Decimal('0.00'), field.normalize('0'))
+        self.assertEqual(Decimal('1.34'), field.normalize('1.34'))
         field = DecimalField(decimal_places=3)
-        self.assertEqual(Decimal('1.340'), field.transform(1.339999999))
+        self.assertEqual(Decimal('1.340'), field.normalize(1.339999999))
 
     def test_validation(self):
         field = DecimalField()
@@ -196,13 +196,13 @@ class DateFieldTests(unittest.TestCase):
     def test_default_transformation(self):
         field = DateField()
         field._set_attr_name('d')
-        dt = field.transform('2000/09/30')
+        dt = field.normalize('2000/09/30')
         self.assertEqual(datetime.datetime(2000, 9, 30), dt)
 
     def test_transformation(self):
         field = DateField(r'%Y/%m/%d %H:%M:%S')
         field._set_attr_name('d')
-        dt = field.transform('2000/09/30 23:59:59')
+        dt = field.normalize('2000/09/30 23:59:59')
         self.assertEqual(datetime.datetime(2000, 9, 30, 23, 59, 59), dt)
 
     def test_validate(self):
@@ -215,5 +215,5 @@ class DateFieldTests(unittest.TestCase):
         field = DateField()
         field._set_attr_name('d')
         date = datetime.datetime(2000, 9, 30)
-        dt = field.transform(date)
+        dt = field.normalize(date)
         self.assertEqual(date, dt)

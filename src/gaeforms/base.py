@@ -34,7 +34,7 @@ class BaseField(object):
         "The filed must be a integer value"
         '''
         if self.choices:
-            value = self.transform_field(value)
+            value = self.normalize_field(value)
             if value in self.choices:
                 return None
             return '%s should be one of %s' % (self._attr, self.choices)
@@ -59,18 +59,25 @@ class BaseField(object):
                 value = None
         return self.validate_field(value)
 
-    def transform(self, value):
+    def normalize(self, value):
+        """
+        Normalizes a value to be stored on db. Transforms string from web requests on db object, removing any
+        localization
+        :param value: value to be normalize
+        :return: a dict with normalized values
+        """
         if self.repeated:
             if value:
-                return [self.transform_field(v) for v in value]
+                return [self.normalize_field(v) for v in value]
             return []
-        return self.transform_field(value)
+        return self.normalize_field(value)
 
-    def transform_field(self, value):
-        '''
+    def normalize_field(self, value):
+        """
         Method that must transform the value from string
         Ex: if the expected type is int, it should return int(self._attr)
-        '''
+
+        """
         if self.default is not None:
             if value is None or value == '':
                 value = self.default
@@ -101,7 +108,7 @@ class IntegerField(BaseField):
 
     def validate_field(self, value):
         try:
-            value = self.transform_field(value)
+            value = self.normalize_field(value)
             if value is not None:
                 if self.lower is not None and self.lower > value:
                     return '%(attribute)s must be greater than %(lower)s' % \
@@ -114,12 +121,12 @@ class IntegerField(BaseField):
             return '%(attribute)s must be integer' % {'attribute': self._attr}
 
 
-    def transform_field(self, value):
+    def normalize_field(self, value):
         if value == '':
             value = None
         elif value is not None:
             value = int(value)
-        return super(IntegerField, self).transform_field(value)
+        return super(IntegerField, self).normalize_field(value)
 
 
 class DecimalField(BaseField):
@@ -128,20 +135,20 @@ class DecimalField(BaseField):
         super(DecimalField, self).__init__(required, default, repeated, choices)
         self.decimal_places = decimal_places
         self.__multiplier = (10 ** self.decimal_places)
-        self.upper = self.transform_field(upper)
-        self.lower = self.transform_field(lower)
+        self.upper = self.normalize_field(upper)
+        self.lower = self.normalize_field(lower)
 
     def set_options(self, model_property):
         super(DecimalField, self).set_options(model_property)
         self.__multiplier = (10 ** model_property.decimal_places)
         self.decimal_places = model_property.decimal_places
-        self.lower = self.transform_field(getattr(model_property, 'lower', None))
-        self.upper = self.transform_field(getattr(model_property, 'upper', None))
+        self.lower = self.normalize_field(getattr(model_property, 'lower', None))
+        self.upper = self.normalize_field(getattr(model_property, 'upper', None))
 
 
     def validate_field(self, value):
         try:
-            value = self.transform_field(value)
+            value = self.normalize_field(value)
             if value is not None:
                 if self.lower is not None and self.lower > value:
                     return '%(attribute)s must be greater than %(lower)s' % \
@@ -154,13 +161,13 @@ class DecimalField(BaseField):
             return '%(attribute)s must be a number' % {'attribute': self._attr}
 
 
-    def transform_field(self, value):
+    def normalize_field(self, value):
         if value == '':
             value = None
         elif value is not None:
             rounded = int(round(Decimal(value) * self.__multiplier))
             value = Decimal(rounded) / self.__multiplier
-        return super(DecimalField, self).transform_field(value)
+        return super(DecimalField, self).normalize_field(value)
 
 
 class DateField(BaseField):
@@ -168,14 +175,14 @@ class DateField(BaseField):
         super(DateField, self).__init__(required, default, repeated, choices)
         self.format = format
 
-    def transform_field(self, value):
-        if isinstance(value,basestring):
+    def normalize_field(self, value):
+        if isinstance(value, basestring):
             return datetime.datetime.strptime(value, self.format)
-        return super(DateField, self).transform_field(value)
+        return super(DateField, self).normalize_field(value)
 
     def validate_field(self, value):
         try:
-            value = self.transform_field(value)
+            value = self.normalize_field(value)
             return super(DateField, self).validate_field(value)
         except:
             return '%(attribute)s must be a date' % {'attribute': self._attr}
@@ -220,7 +227,7 @@ class Form(object):
         return errors
 
     def transform(self):
-        return {k: v.transform(getattr(self, k)) for k, v in self._fields.iteritems()}
+        return {k: v.normalize(getattr(self, k)) for k, v in self._fields.iteritems()}
 
 
 
