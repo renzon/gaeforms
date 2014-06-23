@@ -148,7 +148,7 @@ class IntegerField(BaseField):
         if value == '':
             value = None
         elif value is not None:
-            value = int(i18n.get_i18n().parse_number(value))
+            value = int(i18n.get_i18n().parse_decimal(value))
         return super(IntegerField, self).normalize_field(value)
 
     def localize_field(self, value):

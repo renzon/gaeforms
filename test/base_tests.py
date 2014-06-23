@@ -143,6 +143,9 @@ class IntergerFieldTests(unittest.TestCase):
         self.assertIsNone(field.normalize(None))
         self.assertIsNone(field.normalize(''))
         self.assertEqual(0, field.normalize('0'))
+        self.assertEqual(0, field.normalize('0.0'))
+        self.assertEqual(1000, field.normalize('1,000.0'))
+        self.assertEqual(1111000, field.normalize('1,111,000.0'))
         self.assertEqual(1, field.normalize('1'))
 
     def test_validation(self):
@@ -174,8 +177,7 @@ class SimpleDecimalFieldTests(unittest.TestCase):
         field = DecimalField()
         self.assertIsNone(field.normalize(None))
         self.assertIsNone(field.normalize(''))
-        self.assertEqual(Decimal('0.00'), field.normalize(0))
-        self.assertEqual(Decimal('1.34'), field.normalize(1.339999999))
+        self.assertEqual(Decimal('1.34'), field.normalize('1.339999999'))
         self.assertEqual(Decimal('0.00'), field.normalize('0'))
         self.assertEqual(Decimal('1.34'), field.normalize('1.34'))
         field = DecimalField(decimal_places=3)
