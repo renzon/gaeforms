@@ -59,7 +59,7 @@ class BaseField(object):
                 value = None
         return self.validate_field(value)
 
-    def __execute_one_or_repeated(self, fcn, value):
+    def _execute_one_or_repeated(self, fcn, value):
         if self.repeated:
             if value:
                 return [fcn(v) for v in value]
@@ -73,7 +73,7 @@ class BaseField(object):
         :param value: value to be normalize
         :return: a dict with normalized values
         """
-        return self.__execute_one_or_repeated(self.normalize_field, value)
+        return self._execute_one_or_repeated(self.normalize_field, value)
 
     def normalize_field(self, value):
         """
@@ -229,7 +229,7 @@ class Form(object):
                 errors[k] = error_msg
         return errors
 
-    def transform(self):
+    def normalize(self):
         return {k: v.normalize(getattr(self, k)) for k, v in self._fields.iteritems()}
 
 

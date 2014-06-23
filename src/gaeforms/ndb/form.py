@@ -81,7 +81,7 @@ class ModelForm(Form):
     _exclude = None
 
     def populate(self, model=None):
-        transformed_dct = self.transform()
+        transformed_dct = self.normalize()
         if model:
             model.populate(**transformed_dct)
             return model
