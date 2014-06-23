@@ -125,7 +125,7 @@ class ModelFormTests(GAETestCase):
                               'date': '1999/08/01'}, model.to_dict())
 
 
-class IntegerModelValidatorTests(unittest.TestCase):
+class IntegerModelFormTests(unittest.TestCase):
     def test_fields(self):
         properties = ['integer', 'integer_required', 'integer_repeated',
                       'integer_choices', 'integer_default']

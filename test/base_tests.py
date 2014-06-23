@@ -7,13 +7,12 @@ import webapp2
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField
 
 app = webapp2.WSGIApplication(
-        [webapp2.Route('/', None, name='upload_handler')])
+    [webapp2.Route('/', None, name='upload_handler')])
 
-request = webapp2.Request({'SERVER_NAME':'test', 'SERVER_PORT':80,
-    'wsgi.url_scheme':'http'})
+request = webapp2.Request({'SERVER_NAME': 'test', 'SERVER_PORT': 80,
+                           'wsgi.url_scheme': 'http'})
 request.app = app
 app.set_globals(app=app, request=request)
-
 
 
 def error_msg(attr_name):
@@ -171,6 +170,11 @@ class IntergerFieldTests(unittest.TestCase):
         self.assertIsNone(field.validate('1'))
         self.assertEqual('n must be less than 1', field.validate('2'))
 
+    def test_repeated_localization(self):
+        field = IntegerField(repeated=True)
+        self.assertListEqual(['1,000', '2,222,222', '3'], field.localize([1000, 2222222, 3]))
+        self.assertListEqual([''], field.localize([None]))
+
 
 class SimpleDecimalFieldTests(unittest.TestCase):
     def test_normalization(self):
@@ -180,16 +184,26 @@ class SimpleDecimalFieldTests(unittest.TestCase):
         self.assertEqual(Decimal('1.34'), field.normalize('1.339999999'))
         self.assertEqual(Decimal('0.00'), field.normalize('0'))
         self.assertEqual(Decimal('1.34'), field.normalize('1.34'))
+        self.assertEqual(Decimal('1000.34'), field.normalize('1,000.34'))
+        self.assertEqual(Decimal('1111000.34'), field.normalize('1,111,000.34'))
+        self.assertEqual(Decimal('1111000.34'), field.normalize('1,111,000.3399999'))
         field = DecimalField(decimal_places=3)
-        self.assertEqual(Decimal('1.340'), field.normalize(1.339999999))
+        self.assertEqual(Decimal('1.340'), field.normalize('1.339999999'))
+
+    def test_localization(self):
+        field = DecimalField()
+        self.assertEqual('',field.localize(None))
+        self.assertEqual('',field.localize(''))
+        self.assertEqual('1.34', field.localize(Decimal('1.34')))
+        self.assertEqual('1,111,000.34', field.localize(Decimal('1111000.34')))
+        self.assertEqual('1,111,000.33', field.localize(Decimal('1111000.33')))
+
 
     def test_validation(self):
         field = DecimalField()
         field._set_attr_name('n')
         self.assertIsNone(field.validate(None))
         self.assertIsNone(field.validate(''))
-        self.assertIsNone(field.validate(0))
-        self.assertIsNone(field.validate(1))
         self.assertIsNone(field.validate('0'))
         self.assertIsNone(field.validate('1'))
         self.assertEqual('n must be a number', field.validate('foo'))

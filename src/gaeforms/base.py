@@ -154,6 +154,7 @@ class IntegerField(BaseField):
     def localize_field(self, value):
         if value:
             return i18n.get_i18n().format_number(value)
+        return super(IntegerField, self).localize_field(value)
 
 
 class DecimalField(BaseField):
@@ -162,8 +163,8 @@ class DecimalField(BaseField):
         super(DecimalField, self).__init__(required, default, repeated, choices)
         self.decimal_places = decimal_places
         self.__multiplier = (10 ** self.decimal_places)
-        self.upper = self.normalize_field(upper)
-        self.lower = self.normalize_field(lower)
+        self.upper = None if upper is None else self.normalize_field(unicode(upper))
+        self.lower = None if lower is None else self.normalize_field(unicode(lower))
 
     def set_options(self, model_property):
         super(DecimalField, self).set_options(model_property)
@@ -192,9 +193,15 @@ class DecimalField(BaseField):
         if value == '':
             value = None
         elif value is not None:
+            value=i18n.parse_decimal(value)
             rounded = int(round(Decimal(value) * self.__multiplier))
             value = Decimal(rounded) / self.__multiplier
         return super(DecimalField, self).normalize_field(value)
+
+    def localize_field(self, value):
+        if value:
+            return i18n.format_decimal(value)
+        return super(DecimalField, self).localize_field(value)
 
 
 class DateField(BaseField):
