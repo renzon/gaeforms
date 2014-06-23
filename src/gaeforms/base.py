@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
-import datetime
-from google.appengine.ext.ndb.model import DateTimeProperty, DateProperty
+
 from webapp2_extras.i18n import gettext as _
+from webapp2_extras.i18n import lazy_gettext as _lazy
 from webapp2_extras import i18n
 
 
@@ -205,13 +205,14 @@ class DecimalField(BaseField):
 
 
 class DateField(BaseField):
-    def __init__(self, format='%Y/%m/%d', required=False, default=None, repeated=False, choices=None):
+
+    def __init__(self, format=None, required=False, default=None, repeated=False, choices=None):
         super(DateField, self).__init__(required, default, repeated, choices)
-        self.format = format
+        self.format=format or _lazy('MM/dd/YYYY')
 
     def normalize_field(self, value):
         if isinstance(value, basestring):
-            return datetime.datetime.strptime(value, self.format)
+            return i18n.parse_date(value)
         return super(DateField, self).normalize_field(value)
 
     def validate_field(self, value):
@@ -221,12 +222,12 @@ class DateField(BaseField):
         except:
             return _('%(attribute)s must be a date') % {'attribute': self._attr}
 
-    def set_options(self, model_property):
-        super(DateField, self).set_options(model_property)
-        if isinstance(model_property, DateProperty):
-            self.format = '%Y/%m/%d'
-        elif isinstance(model_property, DateTimeProperty):
-            self.format = '%Y/%m/%d %H:%M:%S'
+    def localize_field(self, value):
+        if value:
+            return i18n.format_date(value,format=self.format)
+        return super(DateField, self).localize_field(value)
+
+
 
 
 class _FormMetaclass(type):

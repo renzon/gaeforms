@@ -4,6 +4,7 @@ from decimal import Decimal
 import unittest
 import datetime
 import webapp2
+from webapp2_extras import i18n
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField
 
 app = webapp2.WSGIApplication(
@@ -192,8 +193,8 @@ class SimpleDecimalFieldTests(unittest.TestCase):
 
     def test_localization(self):
         field = DecimalField()
-        self.assertEqual('',field.localize(None))
-        self.assertEqual('',field.localize(''))
+        self.assertEqual('', field.localize(None))
+        self.assertEqual('', field.localize(''))
         self.assertEqual('1.34', field.localize(Decimal('1.34')))
         self.assertEqual('1,111,000.34', field.localize(Decimal('1111000.34')))
         self.assertEqual('1,111,000.33', field.localize(Decimal('1111000.33')))
@@ -231,17 +232,30 @@ class StringFieldTests(unittest.TestCase):
 
 
 class DateFieldTests(unittest.TestCase):
-    def test_default_normalization(self):
+    def test_normalization(self):
+        field = DateField()
+        dt = field.normalize('09/30/2000')
+        self.assertEqual(datetime.date(2000, 9, 30), dt)
+
+    def test_localization(self):
+        field = DateField()
+        dt = field.localize(datetime.date(2000, 9, 30))
+        self.assertEqual('09/30/2000', dt)
+
+    def test_validate(self):
         field = DateField()
         field._set_attr_name('d')
-        dt = field.normalize('2000/09/30')
-        self.assertEqual(datetime.datetime(2000, 9, 30), dt)
+        self.assertIsNone(field.validate('09/30/2000'))
+        self.assertEqual('d must be a date', field.validate('09/30/a'))
 
+
+
+i18n.default_config['default_timezone']='America/Sao_Paulo'
+class DateTimeFieldTests(unittest.TestCase):
     def test_normalization(self):
-        field = DateField(r'%Y/%m/%d %H:%M:%S')
-        field._set_attr_name('d')
-        dt = field.normalize('2000/09/30 23:59:59')
-        self.assertEqual(datetime.datetime(2000, 9, 30, 23, 59, 59), dt)
+        field = DateField()
+        dt = field.normalize('09/30/2000')
+        self.assertEqual(datetime.datetime(2000, 9, 30), dt)
 
     def test_validate(self):
         field = DateField(r'%Y/%m/%d %H:%M:%S')
