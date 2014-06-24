@@ -16,7 +16,6 @@ request.app = app
 app.set_globals(app=app, request=request)
 
 i18n.default_config['default_timezone'] = 'America/Sao_Paulo'
-i18n.default_config['date_formats']['datetime'] = 'MM/dd/YYYY hh:mm:ss'
 
 
 def error_msg(attr_name):

@@ -161,20 +161,23 @@ class IntegerField(BaseField):
 
 
 class DecimalField(BaseField):
+    def _to_decimal(self, upper):
+        return None if upper is None else self.normalize_field(unicode(upper))
+
     def __init__(self, required=False, default=None, repeated=False, choices=None, decimal_places=2, lower=None,
                  upper=None):
         super(DecimalField, self).__init__(required, default, repeated, choices)
         self.decimal_places = decimal_places
         self.__multiplier = (10 ** self.decimal_places)
-        self.upper = None if upper is None else self.normalize_field(unicode(upper))
-        self.lower = None if lower is None else self.normalize_field(unicode(lower))
+        self.upper = self._to_decimal(upper)
+        self.lower = self._to_decimal(lower)
 
     def set_options(self, model_property):
         super(DecimalField, self).set_options(model_property)
         self.__multiplier = (10 ** model_property.decimal_places)
         self.decimal_places = model_property.decimal_places
-        self.lower = self.normalize_field(getattr(model_property, 'lower', None))
-        self.upper = self.normalize_field(getattr(model_property, 'upper', None))
+        self.lower = self._to_decimal(getattr(model_property, 'lower', None))
+        self.upper = self._to_decimal(getattr(model_property, 'upper', None))
 
 
     def validate_field(self, value):
@@ -226,6 +229,8 @@ class DateField(BaseField):
 
     def localize_field(self, value):
         if value:
+            if isinstance(value, datetime.datetime):
+                value = datetime.date(value.year, value.month, value.day)
             return i18n.get_i18n().format_date(value, format=self.format)
         return super(DateField, self).localize_field(value)
 
@@ -262,7 +267,7 @@ class DateTimeField(BaseField):
             return super(DateTimeField, self).validate_field(value)
         except:
             return _('%(attribute)s must be a date with format %(format)s') % {'attribute': self._attr,
-                                                                       'format': self.format}
+                                                                               'format': self.format}
 
     def localize_field(self, value):
         if value:

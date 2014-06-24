@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 from google.appengine.ext.ndb.model import IntegerProperty, StringProperty, DateTimeProperty, DateProperty
-from gaeforms.base import IntegerField, Form, _FormMetaclass, DecimalField, StringField, DateField
+from gaeforms.base import IntegerField, Form, _FormMetaclass, DecimalField, StringField, DateField, DateTimeField
 from ndbext.property import IntegerBounded, SimpleDecimal, SimpleCurrency
 
 _property_to_field_dct = {}
@@ -16,7 +16,7 @@ registry(IntegerBounded, IntegerField)
 registry(SimpleDecimal, DecimalField)
 registry(SimpleCurrency, DecimalField)
 registry(StringProperty, StringField)
-registry(DateTimeProperty, DateField)
+registry(DateTimeProperty, DateTimeField)
 registry(DateProperty, DateField)
 
 
