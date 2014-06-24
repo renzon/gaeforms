@@ -9,7 +9,7 @@ import webapp2
 from webapp2_extras import i18n
 
 from gaeforms.ndb.form import ModelForm, InvalidParams
-from gaeforms.ndb.property import IntegerBounded, SimpleCurrency, SimpleDecimal
+from gaeforms.ndb.property import IntegerBounded, SimpleCurrency, SimpleDecimal, FloatBounded
 from util import GAETestCase
 from gaeforms.base import IntegerField
 
@@ -40,6 +40,8 @@ class IntegerModelForm(ModelForm):
 class ModelMock(ndb.Model):
     integer = IntegerBounded(required=True, lower=1, upper=2)
     i = ndb.IntegerProperty(default=1)
+    f = ndb.FloatProperty(default=2.1)
+    float_bounded = FloatBounded(required=True, lower=1.1, upper=3.4)
     currency = SimpleCurrency()
     decimal = SimpleDecimal(decimal_places=3, lower='0.001')
     str = ndb.StringProperty()
@@ -58,47 +60,52 @@ class ModelFormOverriding(ModelForm):
 
 class ModelFormTests(GAETestCase):
     def test_overriding(self):
-        validator = ModelFormOverriding(integer='0')
-        self.assertDictEqual({}, validator.validate(),
+        form = ModelFormOverriding(integer='0', float_bounded='2.2')
+        self.assertDictEqual({}, form.validate(),
                                'integer with no bounds should be used once it is overriden on ModelValidatorOverriging')
 
     def test_validate(self):
-        validator = ModelFormMock(integer='1')
-        self.assertDictEqual({}, validator.validate())
-        validator = ModelFormMock()
-        self.assertSetEqual(set(['integer']), set(validator.validate().keys()))
-        validator = ModelFormMock(integer='0')
-        self.assertSetEqual(set(['integer']), set(validator.validate().keys()))
-        validator = ModelFormMock(integer='1',
-                                  decimal='0.001',
-                                  currency='0.01',
-                                  str='a',
-                                  datetime='30/09/2000 23:56:56',
-                                  date='08/01/1999')
-        self.assertDictEqual({}, validator.validate())
-        validator = ModelFormMock(integer='0',
-                                  decimal='0.0001',
-                                  currency='-0.01',
-                                  str='a' * 501,
-                                  datetime='a/09/30 23:56:56',
-                                  date='1999/08/a1')
+        form = ModelFormMock(integer='1', float_bounded='2.0')
+        self.assertDictEqual({}, form.validate())
+        form = ModelFormMock()
+        self.assertSetEqual(set(['integer', 'float_bounded']), set(form.validate().keys()))
+        form = ModelFormMock(integer='0', float_bounded=3.41)
+        self.assertSetEqual(set(['integer', 'float_bounded']), set(form.validate().keys()))
+        form = ModelFormMock(integer='1',
+                             decimal='0.001',
+                             currency='0.01',
+                             float_bounded='2.0',
+                             str='a',
+                             datetime='30/09/2000 23:56:56',
+                             date='08/01/1999')
+        self.assertDictEqual({}, form.validate())
+        form = ModelFormMock(integer='0',
+                             decimal='0.0001',
+                             currency='-0.01',
+                             str='a' * 501,
+                             datetime='a/09/30 23:56:56',
+                             date='1999/08/a1')
         self.assertSetEqual(set(['integer',
                                  'decimal',
                                  'currency',
                                  'str',
                                  'datetime',
+                                 'float_bounded',
                                  'date']),
-                            set(validator.validate().keys()))
+                            set(form.validate().keys()))
 
     def test_populate_model(self):
         model_form = ModelFormMock(integer='1',
                                    decimal='0.001',
                                    currency='0.01',
+                                   float_bounded='2.2',
                                    str='a',
                                    datetime='09/30/2000 23:56:56',
                                    date='08/01/1999')
         property_dct = {'integer': 1,
                         'i': 1,
+                        'float_bounded': 2.2,
+                        'f': 2.1,
                         'decimal': Decimal('0.001'),
                         'currency': Decimal('0.01'),
                         'str': 'a',
@@ -111,11 +118,14 @@ class ModelFormTests(GAETestCase):
         model_form = ModelFormMock(integer='2',
                                    decimal='3.001',
                                    currency='4.01',
+                                   float_bounded= '2.5',
                                    str='b',
                                    datetime='09/30/2000 23:56:56',
                                    date='08/01/1999')
         property_dct = {'integer': 2,
                         'i': 1,
+                        'f': 2.1,
+                        'float_bounded': 2.5,
                         'decimal': Decimal('3.001'),
                         'currency': Decimal('4.01'),
                         'str': 'b',
@@ -131,12 +141,15 @@ class ModelFormTests(GAETestCase):
         model = ModelMock(integer=1,
                           decimal=Decimal('0.001'),
                           currency=Decimal('0.01'),
+                          float_bounded= 2.6,
                           str='a',
                           datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
                           date=datetime.datetime(1999, 8, 1))
         localized_dct = model_form.populate_form(model)
         self.assertDictEqual({'integer': '1',
                               'i': '1',
+                              'float_bounded': '2.6',
+                              'f': '2.1',
                               'decimal': '0.001',
                               'currency': '0.01',
                               'str': 'a',
