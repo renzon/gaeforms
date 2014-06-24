@@ -162,7 +162,7 @@ class ModelFormTests(GAETestCase):
             i = ndb.IntegerProperty()
             f = ndb.FloatProperty()
             float_bounded = FloatBounded( lower=1.1, upper=3.4)
-            currency = SimpleCurrency(default=Decimal('2.55'))
+            currency = SimpleCurrency()
             decimal = SimpleDecimal(decimal_places=3, lower='0.001')
             str = ndb.StringProperty()
             dtime = ndb.DateTimeProperty()

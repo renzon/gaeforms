@@ -352,8 +352,7 @@ class Form(object):
     def localize(self, **obj_values):
         def _localize(k, descriptor):
             value = obj_values.get(k)
-            if value:
-                setattr(self, k, descriptor.localize(value))
+            setattr(self, k, descriptor.localize(value))
             return getattr(self, k)
 
         return {k: _localize(k, v) for k, v in self._fields.iteritems()}
