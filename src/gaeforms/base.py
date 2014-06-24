@@ -160,6 +160,39 @@ class IntegerField(BaseField):
         return super(IntegerField, self).localize_field(value)
 
 
+class FloatField(BaseField):
+    def __init__(self, required=False, default=None, repeated=False, choices=None, lower=None, upper=None):
+        super(FloatField, self).__init__(required, default, repeated, choices)
+        self.upper = upper
+        self.lower = lower
+
+    def validate_field(self, value):
+        try:
+            value = self.normalize_field(value)
+            if value is not None:
+                if self.lower is not None and self.lower > value:
+                    return _('%(attribute)s must be greater than %(lower)s') % {'attribute': self._attr,
+                                                                                'lower': self.lower}
+                if self.upper is not None and self.upper < value:
+                    return _('%(attribute)s must be less than %(upper)s') % {'attribute': self._attr,
+                                                                             'upper': self.upper}
+            return super(FloatField, self).validate_field(value)
+        except:
+            return _('%(attribute)s must be a number') % {'attribute': self._attr}
+
+    def normalize_field(self, value):
+        if value == '':
+            value = None
+        elif value is not None:
+            value = float(i18n.get_i18n().parse_decimal(value))
+        return super(FloatField, self).normalize_field(value)
+
+    def localize_field(self, value):
+        if value:
+            return i18n.get_i18n().format_number(value)
+        return super(FloatField, self).localize_field(value)
+
+
 class DecimalField(BaseField):
     def _to_decimal(self, upper):
         return None if upper is None else self.normalize_field(unicode(upper))

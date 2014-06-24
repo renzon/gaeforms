@@ -6,7 +6,7 @@ import datetime
 
 import webapp2
 
-from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField
+from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, FloatField
 
 
 app = webapp2.WSGIApplication(
@@ -188,8 +188,53 @@ class IntergerFieldTests(unittest.TestCase):
         self.assertListEqual(['1,000', '2,222,222', '3'], field.localize([1000, 2222222, 3]))
         self.assertListEqual([''], field.localize([None]))
 
+class FloatFieldTests(unittest.TestCase):
+    def test_normalization(self):
+        field = FloatField()
+        self.assertIsNone(field.normalize(None))
+        self.assertIsNone(field.normalize(''))
+        self.assertAlmostEqual(1.339999999, field.normalize('1.339999999'))
+        self.assertAlmostEqual(0, field.normalize('0'))
+        self.assertAlmostEqual(1.34, field.normalize('1.34'))
+        self.assertAlmostEqual(1000.34, field.normalize('1,000.34'))
+        self.assertAlmostEqual(1111000.34, field.normalize('1,111,000.34'))
+        self.assertAlmostEqual(1111000.3399999, field.normalize('1,111,000.3399999'))
 
-class SimpleDecimalFieldTests(unittest.TestCase):
+    def test_localization(self):
+        field = FloatField()
+        self.assertAlmostEqual('', field.localize(None))
+        self.assertAlmostEqual('', field.localize(''))
+        self.assertAlmostEqual('1.34', field.localize(1.34))
+        self.assertAlmostEqual('1,111,000.34', field.localize(1111000.34))
+        self.assertAlmostEqual('1,111,000.33', field.localize(1111000.33))
+
+
+    def test_validation(self):
+        field = FloatField()
+        field._set_attr_name('n')
+        self.assertIsNone(field.validate(None))
+        self.assertIsNone(field.validate(''))
+        self.assertIsNone(field.validate('0'))
+        self.assertIsNone(field.validate('1'))
+        self.assertIsNone(field.validate('1,090,898.00'))
+        self.assertEqual('n must be a number', field.validate('foo'))
+        self.assertEqual('n must be a number', field.validate('123h'))
+        self.assertEqual('n must be a number', field.validate('0x456'))
+
+    def test_validation_lower(self):
+        field = FloatField(lower=1.2)
+        field._set_attr_name('n')
+        self.assertIsNone(field.validate('1.21'))
+        self.assertEqual('n must be greater than 1.2', field.validate('0'))
+
+    def test_validation_upper(self):
+        field = FloatField(upper=1.3)
+        field._set_attr_name('n')
+        self.assertIsNone(field.validate('1.29'))
+        self.assertEqual('n must be less than 1.3', field.validate('2'))
+
+
+class SimpleFloatFieldTests(unittest.TestCase):
     def test_normalization(self):
         field = DecimalField()
         self.assertIsNone(field.normalize(None))
