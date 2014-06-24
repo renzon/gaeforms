@@ -211,9 +211,8 @@ class DecimalField(BaseField):
 
 
 class DateField(BaseField):
-    def __init__(self, format=None, required=False, default=None, repeated=False, choices=None):
+    def __init__(self, required=False, default=None, repeated=False, choices=None):
         super(DateField, self).__init__(required, default, repeated, choices)
-        self.format = format or _lazy('MM/dd/YYYY')
 
     def normalize_field(self, value):
         if isinstance(value, basestring):
@@ -231,14 +230,13 @@ class DateField(BaseField):
         if value:
             if isinstance(value, datetime.datetime):
                 value = datetime.date(value.year, value.month, value.day)
-            return i18n.get_i18n().format_date(value, format=self.format)
+            return i18n.get_i18n().format_date(value, format=_('MM/dd/YYYY'))
         return super(DateField, self).localize_field(value)
 
 
 class DateTimeField(BaseField):
-    def __init__(self, format=None, required=False, default=None, repeated=False, choices=None):
+    def __init__(self, required=False, default=None, repeated=False, choices=None):
         super(DateTimeField, self).__init__(required, default, repeated, choices)
-        self.format = format or _lazy('MM/dd/YYYY HH:mm:ss')
 
 
     def normalize_field(self, value):
@@ -267,12 +265,12 @@ class DateTimeField(BaseField):
             return super(DateTimeField, self).validate_field(value)
         except:
             return _('%(attribute)s must be a date with format %(format)s') % {'attribute': self._attr,
-                                                                               'format': self.format}
+                                                                               'format': _('MM/dd/YYYY HH:mm:ss')}
 
     def localize_field(self, value):
         if value:
             datetime = i18n.to_local_timezone(value)
-            return i18n.format_datetime(datetime, self.format)
+            return i18n.format_datetime(datetime, _('MM/dd/YYYY HH:mm:ss'))
         return super(DateTimeField, self).localize_field(value)
 
 

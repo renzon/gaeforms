@@ -15,7 +15,7 @@ request = webapp2.Request({'SERVER_NAME': 'test', 'SERVER_PORT': 80,
 request.app = app
 app.set_globals(app=app, request=request)
 
-i18n.default_config['default_timezone'] = 'America/Sao_Paulo'
+
 
 
 def error_msg(attr_name):

@@ -1,4 +1,4 @@
-# Portuguese (Brazil) translations for PROJECT.
+# Translations template for PROJECT.
 # Copyright (C) 2014 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
@@ -9,10 +9,9 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2014-06-24 02:08-0300\n"
-"PO-Revision-Date: 2014-06-23 23:16-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: pt_BR <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -21,53 +20,53 @@ msgstr ""
 #: gaeforms/base.py:45
 #, python-format
 msgid "%(attribute)s must be one of: %(choices)s"
-msgstr "%(attribute)s deve ser uma das opções: %(choices)s"
+msgstr ""
 
 #: gaeforms/base.py:51
 #, python-format
 msgid "%(attribute)s is required"
-msgstr "%(attribute)s é obrigatório(a)"
+msgstr ""
 
 #: gaeforms/base.py:119
 #, python-format
 msgid "%(attribute)s has %(len)s characters and it must have less than 500"
-msgstr "%(attribute)s tem %(len)s caracteres e deve ter menos de 500"
+msgstr ""
 
 #: gaeforms/base.py:141 gaeforms/base.py:188
 #, python-format
 msgid "%(attribute)s must be greater than %(lower)s"
-msgstr "%(attribute)s deve ser maior que %(lower)s"
+msgstr ""
 
 #: gaeforms/base.py:144 gaeforms/base.py:191
 #, python-format
 msgid "%(attribute)s must be less than %(upper)s"
-msgstr "%(attribute)s deve ser menor que %(upper)s"
+msgstr ""
 
 #: gaeforms/base.py:148
 #, python-format
 msgid "%(attribute)s must be integer"
-msgstr "%(attribute)s devem um número inteiro"
+msgstr ""
 
 #: gaeforms/base.py:195
 #, python-format
 msgid "%(attribute)s must be a number"
-msgstr "%(attribute)s s deve ser um número"
+msgstr ""
 
 #: gaeforms/base.py:227
 #, python-format
 msgid "%(attribute)s must be a date"
-msgstr "%(attribute)s deve ser uma data"
+msgstr ""
 
 #: gaeforms/base.py:233
 msgid "MM/dd/YYYY"
-msgstr "dd/MM/YYYY"
+msgstr ""
 
 #: gaeforms/base.py:267
 #, python-format
 msgid "%(attribute)s must be a date with format %(format)s"
-msgstr "%(attribute)s deve ser uma datahora com o formato %(format)s"
+msgstr ""
 
 #: gaeforms/base.py:268 gaeforms/base.py:273
 msgid "MM/dd/YYYY HH:mm:ss"
-msgstr "dd/MM/YYYY HH:mm:ss"
+msgstr ""
 
