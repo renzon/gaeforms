@@ -5,7 +5,7 @@ import unittest
 import datetime
 import webapp2
 from webapp2_extras import i18n
-from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField
+from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField
 
 app = webapp2.WSGIApplication(
     [webapp2.Route('/', None, name='upload_handler')])
@@ -14,6 +14,9 @@ request = webapp2.Request({'SERVER_NAME': 'test', 'SERVER_PORT': 80,
                            'wsgi.url_scheme': 'http'})
 request.app = app
 app.set_globals(app=app, request=request)
+
+i18n.default_config['default_timezone'] = 'America/Sao_Paulo'
+i18n.default_config['date_formats']['datetime'] = 'MM/dd/YYYY hh:mm:ss'
 
 
 def error_msg(attr_name):
@@ -250,21 +253,31 @@ class DateFieldTests(unittest.TestCase):
 
 
 
-i18n.default_config['default_timezone']='America/Sao_Paulo'
+
+
 class DateTimeFieldTests(unittest.TestCase):
     def test_normalization(self):
-        field = DateField()
-        dt = field.normalize('09/30/2000')
-        self.assertEqual(datetime.datetime(2000, 9, 30), dt)
+        field = DateTimeField()
+        dt = field.normalize('09/30/2000 00:00:00')
+        self.assertEqual(datetime.datetime(2000, 9, 30, 3, 0, 0), dt)
+        dt = field.normalize('09/30/2000 23:00:00')
+        self.assertEqual(datetime.datetime(2000, 10, 1, 2, 0, 0), dt)
+
+    def test_localization(self):
+        field = DateTimeField()
+        dt_str = field.localize(datetime.datetime(2000, 9, 30, 3, 0, 0))
+        self.assertEqual('09/30/2000 00:00:00', dt_str)
+        dt_str = field.localize(datetime.datetime(2000, 10, 1, 2, 0, 0))
+        self.assertEqual('09/30/2000 23:00:00', dt_str)
 
     def test_validate(self):
-        field = DateField(r'%Y/%m/%d %H:%M:%S')
+        field = DateTimeField()
         field._set_attr_name('d')
-        self.assertIsNone(field.validate('2000/09/30 23:59:59'))
-        self.assertEqual('d must be a date', field.validate('2000/09/30 23:59:a'))
+        self.assertIsNone(field.validate('09/30/2000 23:59:59'))
+        self.assertEqual('d must be a date with format MM/dd/YYYY HH:mm:ss', field.validate('09/30/2000 23:59:a'))
 
     def test_date_assignment(self):
-        field = DateField()
+        field = DateTimeField()
         field._set_attr_name('d')
         date = datetime.datetime(2000, 9, 30)
         dt = field.normalize(date)

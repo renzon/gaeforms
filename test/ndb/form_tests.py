@@ -121,8 +121,8 @@ class ModelFormTests(GAETestCase):
                               'decimal': '0.001',
                               'currency': '0.01',
                               'str': 'a',
-                              'datetime': '2000/09/30 23:56:56',
-                              'date': '1999/08/01'}, model.to_dict())
+                              'datetime': '09/30/2000 23:56:56',
+                              'date': '08/01/1999'}, model.to_dict())
 
 
 class IntegerModelFormTests(unittest.TestCase):

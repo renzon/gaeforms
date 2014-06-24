@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
+import datetime
 
 from webapp2_extras.i18n import gettext as _
+
 from webapp2_extras.i18n import lazy_gettext as _lazy
 from webapp2_extras import i18n
+import pytz
 
 
 class BaseField(object):
@@ -193,26 +196,25 @@ class DecimalField(BaseField):
         if value == '':
             value = None
         elif value is not None:
-            value=i18n.parse_decimal(value)
+            value = i18n.get_i18n().parse_decimal(value)
             rounded = int(round(Decimal(value) * self.__multiplier))
             value = Decimal(rounded) / self.__multiplier
         return super(DecimalField, self).normalize_field(value)
 
     def localize_field(self, value):
         if value:
-            return i18n.format_decimal(value)
+            return i18n.get_i18n().format_decimal(value)
         return super(DecimalField, self).localize_field(value)
 
 
 class DateField(BaseField):
-
     def __init__(self, format=None, required=False, default=None, repeated=False, choices=None):
         super(DateField, self).__init__(required, default, repeated, choices)
-        self.format=format or _lazy('MM/dd/YYYY')
+        self.format = format or _lazy('MM/dd/YYYY')
 
     def normalize_field(self, value):
         if isinstance(value, basestring):
-            return i18n.parse_date(value)
+            return i18n.get_i18n().parse_date(value)
         return super(DateField, self).normalize_field(value)
 
     def validate_field(self, value):
@@ -224,10 +226,49 @@ class DateField(BaseField):
 
     def localize_field(self, value):
         if value:
-            return i18n.format_date(value,format=self.format)
+            return i18n.get_i18n().format_date(value, format=self.format)
         return super(DateField, self).localize_field(value)
 
 
+class DateTimeField(BaseField):
+    def __init__(self, format=None, required=False, default=None, repeated=False, choices=None):
+        super(DateTimeField, self).__init__(required, default, repeated, choices)
+        self.format = format or _lazy('MM/dd/YYYY HH:mm:ss')
+
+
+    def normalize_field(self, value):
+        if isinstance(value, basestring):
+            # workaround because  i18n.parse_datetime is not working
+            def _to_datetime(date, time=None):
+                if time is None:
+                    time = date
+                return datetime.datetime(date.year, date.month, date.day, time.hour, time.minute, time.second)
+
+            slices = value.split(' ')
+            dt_slice = slices[0]
+            time_slice = slices[1]
+            i18n_obj = i18n.get_i18n()
+            date, time = i18n_obj.parse_date(dt_slice), i18n_obj.parse_time(time_slice)
+            loc_datime_without_tz = _to_datetime(date, time)
+            localized_time = i18n_obj.tzinfo.localize(loc_datime_without_tz)
+            utc_datetime = pytz.utc.normalize(localized_time)
+            return _to_datetime(utc_datetime)
+
+        return super(DateTimeField, self).normalize_field(value)
+
+    def validate_field(self, value):
+        try:
+            value = self.normalize_field(value)
+            return super(DateTimeField, self).validate_field(value)
+        except:
+            return _('%(attribute)s must be a date with format %(format)s') % {'attribute': self._attr,
+                                                                       'format': self.format}
+
+    def localize_field(self, value):
+        if value:
+            datetime = i18n.to_local_timezone(value)
+            return i18n.format_datetime(datetime, self.format)
+        return super(DateTimeField, self).localize_field(value)
 
 
 class _FormMetaclass(type):
