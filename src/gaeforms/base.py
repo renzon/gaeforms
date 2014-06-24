@@ -294,8 +294,9 @@ class Form(object):
     __metaclass__ = _FormMetaclass
 
     def __init__(self, **kwargs):
-        for k, v in kwargs.iteritems():
-            setattr(self, k, v)
+        for k, v in self._fields.iteritems():
+            if k in kwargs:
+                setattr(self, k, kwargs[k])
 
     def validate(self):
         errors = {}
@@ -305,8 +306,15 @@ class Form(object):
                 errors[k] = error_msg
         return errors
 
+    def _normalize_helper(self, key, descriptor):
+        try:
+            value = getattr(self, key)
+        except AttributeError:
+            return descriptor.default
+        return descriptor.normalize(value)
+
     def normalize(self):
-        return {k: v.normalize(getattr(self, k)) for k, v in self._fields.iteritems()}
+        return {k: self._normalize_helper(k, v) for k, v in self._fields.iteritems()}
 
     def localize(self, **obj_values):
         def _localize(k, descriptor):

@@ -37,6 +37,7 @@ class IntegerModelForm(ModelForm):
 
 class ModelMock(ndb.Model):
     integer = IntegerBounded(required=True, lower=1, upper=2)
+    i = ndb.IntegerProperty(default=1)
     currency = SimpleCurrency()
     decimal = SimpleDecimal(decimal_places=3, lower='0.001')
     str = ndb.StringProperty()
@@ -95,6 +96,7 @@ class ModelFormTests(GAETestCase):
                                    datetime='09/30/2000 23:56:56',
                                    date='08/01/1999')
         property_dct = {'integer': 1,
+                        'i': 1,
                         'decimal': Decimal('0.001'),
                         'currency': Decimal('0.01'),
                         'str': 'a',
@@ -111,6 +113,7 @@ class ModelFormTests(GAETestCase):
                                    datetime='09/30/2000 23:56:56',
                                    date='08/01/1999')
         property_dct = {'integer': 2,
+                        'i': 1,
                         'decimal': Decimal('3.001'),
                         'currency': Decimal('4.01'),
                         'str': 'b',
@@ -131,6 +134,7 @@ class ModelFormTests(GAETestCase):
                           date=datetime.datetime(1999, 8, 1))
         localized_dct = model_form.populate_form(model)
         self.assertDictEqual({'integer': '1',
+                              'i': '1',
                               'decimal': '0.001',
                               'currency': '0.01',
                               'str': 'a',
