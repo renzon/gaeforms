@@ -118,7 +118,7 @@ class ModelFormTests(GAETestCase):
         model_form = ModelFormMock(integer='2',
                                    decimal='3.001',
                                    currency='4.01',
-                                   float_bounded= '2.5',
+                                   float_bounded='2.5',
                                    str='b',
                                    datetime='09/30/2000 23:56:56',
                                    date='08/01/1999')
@@ -141,7 +141,7 @@ class ModelFormTests(GAETestCase):
         model = ModelMock(integer=1,
                           decimal=Decimal('0.001'),
                           currency=Decimal('0.01'),
-                          float_bounded= 2.6,
+                          float_bounded=2.6,
                           str='a',
                           datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
                           date=datetime.datetime(1999, 8, 1))

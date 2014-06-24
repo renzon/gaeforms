@@ -26,6 +26,7 @@ class IntegerBounded(ndb.IntegerProperty):
         if self.upper is not None and value > self.upper:
             raise BoundaryError('%s is greater then %s' % (value, self.upper))
 
+
 class FloatBounded(ndb.FloatProperty):
     '''
     Property to define a bounded Float based on lower and upper values

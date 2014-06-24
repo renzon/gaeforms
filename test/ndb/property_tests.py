@@ -38,13 +38,15 @@ class IntegerBoundedTests(unittest.TestCase):
         IntegerModelMock(upper=-99999999999999999999)
 
     def test_none(self):
-        #asserting nothing hapens with None values
+        # asserting nothing hapens with None values
         IntegerModelMock(lower=None, upper=None, lower_and_upper=None)
+
 
 class FloatModelMock(ndb.Model):
     lower = FloatBounded(lower=0.1)
     upper = FloatBounded(upper=3.1)
     lower_and_upper = FloatBounded(lower=-1.1, upper=1.2)
+
 
 class FloatBoundedTests(unittest.TestCase):
     def test_lower(self):
@@ -71,7 +73,7 @@ class FloatBoundedTests(unittest.TestCase):
         FloatModelMock(upper=-99999999999999999999)
 
     def test_none(self):
-        #asserting nothing hapens with None values
+        # asserting nothing hapens with None values
         FloatModelMock(lower=None, upper=None, lower_and_upper=None)
 
 
@@ -155,5 +157,5 @@ class SimpleCurrencyTests(GAETestCase):
         class ModelMock(ndb.Model):
             currency = SimpleCurrency()
 
-        self.assertRaises(BoundaryError, ModelMock,currency='-0.01')
+        self.assertRaises(BoundaryError, ModelMock, currency='-0.01')
         ModelMock(currency='0').put()
