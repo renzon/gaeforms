@@ -156,6 +156,36 @@ class ModelFormTests(GAETestCase):
                               'datetime': '09/30/2000 20:56:56',
                               'date': '08/01/1999'}, localized_dct)
 
+    def test_populate_form_model_with_defaults(self):
+        class ModelWithDefaults(ndb.Model):
+            integer = IntegerBounded(lower=1, upper=2)
+            i = ndb.IntegerProperty()
+            f = ndb.FloatProperty()
+            float_bounded = FloatBounded( lower=1.1, upper=3.4)
+            currency = SimpleCurrency(default=Decimal('2.55'))
+            decimal = SimpleDecimal(decimal_places=3, lower='0.001')
+            str = ndb.StringProperty()
+            dtime = ndb.DateTimeProperty()
+            dt = ndb.DateProperty()
+
+        class FormDefaults(ModelForm):
+            _model_class = ModelWithDefaults
+
+        form = FormDefaults()
+        model = ModelWithDefaults()
+        model.put()
+        form.populate_form(model)
+
+        self.assertEqual('', form.integer)
+        self.assertEqual('', form.dtime)  # different because of timezone
+        self.assertEqual('', form.dt)
+        self.assertEqual('', form.integer)
+        self.assertEqual('', form.i)
+        self.assertEqual('', form.f)
+        self.assertEqual('', form.float_bounded)
+        self.assertEqual('', form.currency)
+        self.assertEqual('', form.decimal)
+
 
 class IntegerModelFormTests(unittest.TestCase):
     def test_fields(self):
