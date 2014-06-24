@@ -5,7 +5,7 @@ import unittest
 
 from google.appengine.ext import ndb
 
-from gaeforms.ndb.property import IntegerBounded, BoundaryError, SimpleDecimal, SimpleCurrency
+from gaeforms.ndb.property import IntegerBounded, BoundaryError, SimpleDecimal, SimpleCurrency, FloatBounded
 from util import GAETestCase
 
 
@@ -40,6 +40,39 @@ class IntegerBoundedTests(unittest.TestCase):
     def test_none(self):
         #asserting nothing hapens with None values
         IntegerModelMock(lower=None, upper=None, lower_and_upper=None)
+
+class FloatModelMock(ndb.Model):
+    lower = FloatBounded(lower=0.1)
+    upper = FloatBounded(upper=3.1)
+    lower_and_upper = FloatBounded(lower=-1.1, upper=1.2)
+
+class FloatBoundedTests(unittest.TestCase):
+    def test_lower(self):
+        self.assertRaises(BoundaryError, FloatModelMock, lower=-1)
+
+        # no exceptions with bigger values
+        FloatModelMock(lower=0.1)
+        FloatModelMock(lower=1.1)
+        FloatModelMock(lower=99999999999999999999)
+
+    def test_lower_and_upper(self):
+        self.assertRaises(BoundaryError, FloatModelMock, lower_and_upper=-3)
+        self.assertRaises(BoundaryError, FloatModelMock, lower_and_upper=2)
+
+        # no exceptions with values in interval
+        FloatModelMock(lower_and_upper=0)
+
+    def test_upper(self):
+        self.assertRaises(BoundaryError, FloatModelMock, upper=4)
+
+        # no exceptions with bigger values
+        FloatModelMock(upper=3)
+        FloatModelMock(upper=1.2)
+        FloatModelMock(upper=-99999999999999999999)
+
+    def test_none(self):
+        #asserting nothing hapens with None values
+        FloatModelMock(lower=None, upper=None, lower_and_upper=None)
 
 
 class SimpleDecimalModelMock(ndb.Model):
