@@ -88,8 +88,8 @@ class BaseFieldTests(unittest.TestCase):
         self.assertIsNone(field_not_required.validate('Foo'))
         field_required = BaseField(required=True)
         field_required._attr = 'req'
-        self.assertEqual('req is required', field_required.validate(''))
-        self.assertEqual('req is required', field_required.validate(None))
+        self.assertEqual('Required field', field_required.validate(''))
+        self.assertEqual('Required field', field_required.validate(None))
         self.assertIsNone(field_required.validate('Foo'))
 
     def test_default(self):
@@ -114,7 +114,7 @@ class BaseFieldTests(unittest.TestCase):
         field._attr = 'foo'
         self.assertIsNone(field.validate('1'))
         self.assertIsNone(field.validate('2'))
-        self.assertEqual('foo must be one of: 1; 2', field.validate(None))
+        self.assertEqual('Must be one of: 1; 2', field.validate(None))
 
 
     def test_repeated(self):
@@ -131,10 +131,10 @@ class BaseFieldTests(unittest.TestCase):
 
         self.assertIsNone(field.validate(['1']))
         self.assertIsNone(field.validate(['1', '2']))
-        self.assertEqual('req is required', field.validate(None))
-        self.assertEqual('req is required', field.validate([None]))
-        self.assertEqual('req is required', field.validate([]))
-        self.assertEqual('req is required', field.validate(['1,', None]))
+        self.assertEqual('Required field', field.validate(None))
+        self.assertEqual('Required field', field.validate([None]))
+        self.assertEqual('Required field', field.validate([]))
+        self.assertEqual('Required field', field.validate(['1,', None]))
 
     def test_repeated_normalization(self):
         field = MockField(repeated=True)
@@ -145,9 +145,9 @@ class EmailFieldTests(unittest.TestCase):
         field = EmailField()
         field._attr = 'contact_email'
 
-        self.assertEqual('must be a valid email', field.validate('aa'))
-        self.assertEqual('must be a valid email', field.validate('a@'))
-        self.assertEqual('must be a valid email', field.validate('a@com'))
+        self.assertEqual('Invalid email', field.validate('aa'))
+        self.assertEqual('Invalid email', field.validate('a@'))
+        self.assertEqual('Invalid email', field.validate('a@com'))
         self.assertIsNone(field.validate('a@google.com'))
 
 
@@ -179,21 +179,21 @@ class IntergerFieldTests(unittest.TestCase):
         self.assertIsNone(field.validate(''))
         self.assertIsNone(field.validate('0'))
         self.assertIsNone(field.validate('1'))
-        self.assertEqual('n must be integer', field.validate('foo'))
-        self.assertEqual('n must be integer', field.validate('123h'))
-        self.assertEqual('n must be integer', field.validate('0x456'))
+        self.assertEqual('Must be integer', field.validate('foo'))
+        self.assertEqual('Must be integer', field.validate('123h'))
+        self.assertEqual('Must be integer', field.validate('0x456'))
 
     def test_validation_lower(self):
         field = IntegerField(lower=1)
         field._set_attr_name('n')
         self.assertIsNone(field.validate('1'))
-        self.assertEqual('n must be greater than 1', field.validate('0'))
+        self.assertEqual('Must be greater than 1', field.validate('0'))
 
     def test_validation_upper(self):
         field = IntegerField(upper=1)
         field._set_attr_name('n')
         self.assertIsNone(field.validate('1'))
-        self.assertEqual('n must be less than 1', field.validate('2'))
+        self.assertEqual('Must be less than 1', field.validate('2'))
 
     def test_repeated_localization(self):
         field = IntegerField(repeated=True)
@@ -230,21 +230,21 @@ class FloatFieldTests(unittest.TestCase):
         self.assertIsNone(field.validate('0'))
         self.assertIsNone(field.validate('1'))
         self.assertIsNone(field.validate('1,090,898.00'))
-        self.assertEqual('n must be a number', field.validate('foo'))
-        self.assertEqual('n must be a number', field.validate('123h'))
-        self.assertEqual('n must be a number', field.validate('0x456'))
+        self.assertEqual('Must be a number', field.validate('foo'))
+        self.assertEqual('Must be a number', field.validate('123h'))
+        self.assertEqual('Must be a number', field.validate('0x456'))
 
     def test_validation_lower(self):
         field = FloatField(lower=1.2)
         field._set_attr_name('n')
         self.assertIsNone(field.validate('1.21'))
-        self.assertEqual('n must be greater than 1.2', field.validate('0'))
+        self.assertEqual('Must be greater than 1.2', field.validate('0'))
 
     def test_validation_upper(self):
         field = FloatField(upper=1.3)
         field._set_attr_name('n')
         self.assertIsNone(field.validate('1.29'))
-        self.assertEqual('n must be less than 1.3', field.validate('2'))
+        self.assertEqual('Must be less than 1.3', field.validate('2'))
 
 
 class SimpleFloatFieldTests(unittest.TestCase):
@@ -277,28 +277,28 @@ class SimpleFloatFieldTests(unittest.TestCase):
         self.assertIsNone(field.validate(''))
         self.assertIsNone(field.validate('0'))
         self.assertIsNone(field.validate('1'))
-        self.assertEqual('n must be a number', field.validate('foo'))
-        self.assertEqual('n must be a number', field.validate('123h'))
-        self.assertEqual('n must be a number', field.validate('0x456'))
+        self.assertEqual('Must be a number', field.validate('foo'))
+        self.assertEqual('Must be a number', field.validate('123h'))
+        self.assertEqual('Must be a number', field.validate('0x456'))
 
     def test_validation_lower(self):
         field = DecimalField(lower=1)
         field._set_attr_name('n')
         self.assertIsNone(field.validate('1'))
-        self.assertEqual('n must be greater than 1', field.validate('0'))
+        self.assertEqual('Must be greater than 1', field.validate('0'))
 
     def test_validation_upper(self):
         field = DecimalField(upper=1)
         field._set_attr_name('n')
         self.assertIsNone(field.validate('1'))
-        self.assertEqual('n must be less than 1', field.validate('2'))
+        self.assertEqual('Must be less than 1', field.validate('2'))
 
 
 class StringFieldTests(unittest.TestCase):
     def test_str_with_more_than_500_chars(self):
         field = StringField()
         field._set_attr_name('n')
-        self.assertEqual('n has 501 characters and it must have less than 500', field.validate_field('a' * 501))
+        self.assertEqual('Has 501 characters and it must have less than 500', field.validate_field('a' * 501))
 
 
 class DateFieldTests(unittest.TestCase):
@@ -316,7 +316,7 @@ class DateFieldTests(unittest.TestCase):
         field = DateField()
         field._set_attr_name('d')
         self.assertIsNone(field.validate('09/30/2000'))
-        self.assertEqual('d must be a date', field.validate('09/30/a'))
+        self.assertEqual('Invalid date. Must be on format MM/dd/YYYY', field.validate('09/30/a'))
 
 
 class DateTimeFieldTests(unittest.TestCase):
@@ -338,7 +338,7 @@ class DateTimeFieldTests(unittest.TestCase):
         field = DateTimeField()
         field._set_attr_name('d')
         self.assertIsNone(field.validate('09/30/2000 23:59:59'))
-        self.assertEqual('d must be a date with format MM/dd/YYYY HH:mm:ss', field.validate('09/30/2000 23:59:a'))
+        self.assertEqual('Invalid datetime. Must be on format MM/dd/YYYY HH:mm:ss', field.validate('09/30/2000 23:59:a'))
 
     def test_date_assignment(self):
         field = DateTimeField()

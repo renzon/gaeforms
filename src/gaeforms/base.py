@@ -43,13 +43,12 @@ class BaseField(object):
             value = self.normalize_field(value)
             if value in self.choices:
                 return None
-            return _('%(attribute)s must be one of: %(choices)s') % {'attribute': self._attr,
-                                                                     'choices': '; '.join(self.choices)}
+            return _('Must be one of: %(choices)s') % {'choices': '; '.join(self.choices)}
         if self.default is not None:
             if value is None or value == '':
                 value = self.default
         if self.required and (value is None or value == ''):
-            return _('%(attribute)s is required') % {'attribute': self._attr}
+            return _('Required field')
 
 
     def __get__(self, instance, owner):
@@ -117,15 +116,14 @@ class BaseField(object):
 class StringField(BaseField):
     def validate_field(self, value):
         if value and len(value) > 500:
-            return _('%(attribute)s has %(len)s characters and it must have less than 500') % {'attribute': self._attr,
-                                                                                               'len': len(value)}
+            return _('Has %(len)s characters and it must have less than 500') % {'len': len(value)}
 
         return super(StringField, self).validate_field(value)
 
 class EmailField(BaseField):
     def validate_field(self, value):
         if value and not re.match(r'[^@]+@[^@]+\.[^@]+', value):
-            return _('must be a valid email')
+            return _('Invalid email')
 
         return super(EmailField, self).validate_field(value)
 
@@ -146,14 +144,12 @@ class IntegerField(BaseField):
             value = self.normalize_field(value)
             if value is not None:
                 if self.lower is not None and self.lower > value:
-                    return _('%(attribute)s must be greater than %(lower)s') % {'attribute': self._attr,
-                                                                                'lower': self.lower}
+                    return _('Must be greater than %(lower)s') % {'lower': self.lower}
                 if self.upper is not None and self.upper < value:
-                    return _('%(attribute)s must be less than %(upper)s') % {'attribute': self._attr,
-                                                                             'upper': self.upper}
+                    return _('Must be less than %(upper)s') % {'upper': self.upper}
             return super(IntegerField, self).validate_field(value)
         except:
-            return _('%(attribute)s must be integer') % {'attribute': self._attr}
+            return _('Must be integer')
 
     def normalize_field(self, value):
         if value == '':
@@ -179,14 +175,12 @@ class FloatField(BaseField):
             value = self.normalize_field(value)
             if value is not None:
                 if self.lower is not None and self.lower > value:
-                    return _('%(attribute)s must be greater than %(lower)s') % {'attribute': self._attr,
-                                                                                'lower': self.lower}
+                    return _('Must be greater than %(lower)s') % {'lower': self.lower}
                 if self.upper is not None and self.upper < value:
-                    return _('%(attribute)s must be less than %(upper)s') % {'attribute': self._attr,
-                                                                             'upper': self.upper}
+                    return _('Must be less than %(upper)s') % {'upper': self.upper}
             return super(FloatField, self).validate_field(value)
         except:
-            return _('%(attribute)s must be a number') % {'attribute': self._attr}
+            return _('Must be a number')
 
     def normalize_field(self, value):
         if value == '':
@@ -226,14 +220,12 @@ class DecimalField(BaseField):
             value = self.normalize_field(value)
             if value is not None:
                 if self.lower is not None and self.lower > value:
-                    return _('%(attribute)s must be greater than %(lower)s') % {'attribute': self._attr,
-                                                                                'lower': self.lower}
+                    return _('Must be greater than %(lower)s') % {'lower': self.lower}
                 if self.upper is not None and self.upper < value:
-                    return _('%(attribute)s must be less than %(upper)s') % {'attribute': self._attr,
-                                                                             'upper': self.upper}
+                    return _('Must be less than %(upper)s') % {'upper': self.upper}
             return super(DecimalField, self).validate_field(value)
         except:
-            return _('%(attribute)s must be a number') % {'attribute': self._attr}
+            return _('Must be a number')
 
 
     def normalize_field(self, value):
@@ -265,7 +257,7 @@ class DateField(BaseField):
             value = self.normalize_field(value)
             return super(DateField, self).validate_field(value)
         except:
-            return _('%(attribute)s must be a date') % {'attribute': self._attr}
+            return _('Invalid date. Must be on format %(format)s') % {'format': _('MM/dd/YYYY')}
 
     def localize_field(self, value):
         if value:
@@ -305,8 +297,7 @@ class DateTimeField(BaseField):
             value = self.normalize_field(value)
             return super(DateTimeField, self).validate_field(value)
         except:
-            return _('%(attribute)s must be a date with format %(format)s') % {'attribute': self._attr,
-                                                                               'format': _('MM/dd/YYYY HH:mm:ss')}
+            return _('Invalid datetime. Must be on format %(format)s') % {'format': _('MM/dd/YYYY HH:mm:ss')}
 
     def localize_field(self, value):
         if value:
