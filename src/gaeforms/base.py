@@ -8,6 +8,7 @@ from webapp2_extras.i18n import gettext as _
 from webapp2_extras.i18n import lazy_gettext as _lazy
 from webapp2_extras import i18n
 import pytz
+import re
 
 
 class BaseField(object):
@@ -120,6 +121,13 @@ class StringField(BaseField):
                                                                                                'len': len(value)}
 
         return super(StringField, self).validate_field(value)
+
+class EmailField(BaseField):
+    def validate_field(self, value):
+        if value and not re.match(r'[^@]+@[^@]+\.[^@]+', value):
+            return _('must be a valid email')
+
+        return super(EmailField, self).validate_field(value)
 
 
 class IntegerField(BaseField):

@@ -6,9 +6,10 @@ import datetime
 
 import webapp2
 
-from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, FloatField
+from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, FloatField, \
+    EmailField
 
-
+#workaroung to enable i18n tests
 app = webapp2.WSGIApplication(
     [webapp2.Route('/', None, name='upload_handler')])
 
@@ -16,6 +17,7 @@ request = webapp2.Request({'SERVER_NAME': 'test', 'SERVER_PORT': 80,
                            'wsgi.url_scheme': 'http'})
 request.app = app
 app.set_globals(app=app, request=request)
+#end fo workaround
 
 
 def error_msg(attr_name):
@@ -137,6 +139,16 @@ class BaseFieldTests(unittest.TestCase):
     def test_repeated_normalization(self):
         field = MockField(repeated=True)
         self.assertListEqual([1, 2, 3], field.normalize(['1', '2', '3']))
+
+class EmailFieldTests(unittest.TestCase):
+    def test_validate(self):
+        field = EmailField()
+        field._attr = 'contact_email'
+
+        self.assertEqual('must be a valid email', field.validate('aa'))
+        self.assertEqual('must be a valid email', field.validate('a@'))
+        self.assertEqual('must be a valid email', field.validate('a@com'))
+        self.assertIsNone(field.validate('a@google.com'))
 
 
 class IntergerFieldTests(unittest.TestCase):
