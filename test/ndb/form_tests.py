@@ -9,7 +9,7 @@ import webapp2
 from webapp2_extras import i18n
 
 from gaeforms.ndb.form import ModelForm, InvalidParams
-from gaeforms.ndb.property import IntegerBounded, SimpleCurrency, SimpleDecimal, FloatBounded
+from gaeforms.ndb.property import IntegerBounded, SimpleCurrency, SimpleDecimal, FloatBounded, Email
 from util import GAETestCase
 from gaeforms.base import IntegerField
 
@@ -47,6 +47,7 @@ class ModelMock(ndb.Model):
     str = ndb.StringProperty()
     datetime = ndb.DateTimeProperty()
     date = ndb.DateProperty()
+    email = Email()
 
 
 class ModelFormMock(ModelForm):
@@ -76,6 +77,7 @@ class ModelFormTests(GAETestCase):
                              currency='0.01',
                              float_bounded='2.0',
                              str='a',
+                             email='foo@bar.com',
                              datetime='30/09/2000 23:56:56',
                              date='08/01/1999')
         self.assertDictEqual({}, form.validate())
@@ -83,12 +85,14 @@ class ModelFormTests(GAETestCase):
                              decimal='0.0001',
                              currency='-0.01',
                              str='a' * 501,
+                             email='foo@bar',
                              datetime='a/09/30 23:56:56',
                              date='1999/08/a1')
         self.assertSetEqual(set(['integer',
                                  'decimal',
                                  'currency',
                                  'str',
+                                 'email',
                                  'datetime',
                                  'float_bounded',
                                  'date']),
@@ -100,12 +104,14 @@ class ModelFormTests(GAETestCase):
                                    currency='0.01',
                                    float_bounded='2.2',
                                    str='a',
+                                   email='foo@bar.com',
                                    datetime='09/30/2000 23:56:56',
                                    date='08/01/1999')
         property_dct = {'integer': 1,
                         'i': 1,
                         'float_bounded': 2.2,
                         'f': 2.1,
+                        'email':'foo@bar.com',
                         'decimal': Decimal('0.001'),
                         'currency': Decimal('0.01'),
                         'str': 'a',
@@ -119,12 +125,14 @@ class ModelFormTests(GAETestCase):
                                    decimal='3.001',
                                    currency='4.01',
                                    float_bounded='2.5',
+                                   email='foo@bar.com',
                                    str='b',
                                    datetime='09/30/2000 23:56:56',
                                    date='08/01/1999')
         property_dct = {'integer': 2,
                         'i': 1,
                         'f': 2.1,
+                        'email':'foo@bar.com',
                         'float_bounded': 2.5,
                         'decimal': Decimal('3.001'),
                         'currency': Decimal('4.01'),
@@ -142,6 +150,7 @@ class ModelFormTests(GAETestCase):
                           decimal=Decimal('0.001'),
                           currency=Decimal('0.01'),
                           float_bounded=2.6,
+                          email='foo@bar.com',
                           str='a',
                           datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
                           date=datetime.datetime(1999, 8, 1))
@@ -150,6 +159,7 @@ class ModelFormTests(GAETestCase):
                               'i': '1',
                               'float_bounded': '2.6',
                               'f': '2.1',
+                              'email':'foo@bar.com',
                               'decimal': '0.001',
                               'currency': '0.01',
                               'str': 'a',
@@ -161,7 +171,7 @@ class ModelFormTests(GAETestCase):
             integer = IntegerBounded(lower=1, upper=2)
             i = ndb.IntegerProperty()
             f = ndb.FloatProperty()
-            float_bounded = FloatBounded( lower=1.1, upper=3.4)
+            float_bounded = FloatBounded(lower=1.1, upper=3.4)
             currency = SimpleCurrency()
             decimal = SimpleDecimal(decimal_places=3, lower='0.001')
             str = ndb.StringProperty()

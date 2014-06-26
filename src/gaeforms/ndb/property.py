@@ -9,6 +9,10 @@ class BoundaryError(Exception):
     pass
 
 
+#this class is used only to distinguish from StringProperty
+class Email(ndb.StringProperty):
+    pass
+
 class IntegerBounded(ndb.IntegerProperty):
     '''
     Property to define a bounded integer based on lower and upper values
