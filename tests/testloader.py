@@ -18,9 +18,9 @@ if __name__ == '__main__':
         import dev_appserver
         dev_appserver.fix_sys_path()
 
-    sys.path.append(os.path.join(PROJECT_PATH, 'src'))
+    sys.path.append(os.path.join(PROJECT_PATH, '..'))
 
-    tests = unittest.TestLoader().discover(ROOT_PATH, "*tests.py")
+    tests = unittest.TestLoader().discover(ROOT_PATH, "*.py")
     result = unittest.TextTestRunner().run(tests)
 
     if not result.wasSuccessful():
