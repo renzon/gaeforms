@@ -300,6 +300,10 @@ class StringFieldTests(unittest.TestCase):
         field._set_attr_name('n')
         self.assertEqual('Has 501 characters and it must have less than 500', field.validate_field('a' * 501))
 
+    def test_str_with_more_than_500_chars_but_with_no_max(self):
+        field = StringField(max_len=None)
+        self.assertIsNone( field.validate_field('a' * 501))
+
 
 class DateFieldTests(unittest.TestCase):
     def test_normalization(self):

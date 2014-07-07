@@ -114,11 +114,22 @@ class BaseField(object):
 
 # Concrete fields
 class StringField(BaseField):
+    def __init__(self, required=False, default=None, repeated=False, choices=None, max_len=500):
+        super(StringField, self).__init__(required, default, repeated, choices)
+        self.max_len = max_len
+
+    def set_options(self, model_property):
+        super(StringField, self).set_options(model_property)
+        self.max_len = 500 if model_property._indexed else None
+
+
     def validate_field(self, value):
-        if value and len(value) > 500:
-            return _('Has %(len)s characters and it must have less than 500') % {'len': len(value)}
+        if self.max_len and value and len(value) > self.max_len:
+            return _('Has %(len)s characters and it must have less than %(max_len)s') % {'len': len(value),
+                                                                                        'max_len': self.max_len}
 
         return super(StringField, self).validate_field(value)
+
 
 class EmailField(BaseField):
     def validate_field(self, value):

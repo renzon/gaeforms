@@ -1,4 +1,3 @@
-from setup import install_requires
 import codecs
 import os
 import sys

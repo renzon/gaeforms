@@ -45,6 +45,8 @@ class ModelMock(ndb.Model):
     currency = SimpleCurrency()
     decimal = SimpleDecimal(decimal_places=3, lower='0.001')
     str = ndb.StringProperty()
+    str_not_indexed = ndb.StringProperty(indexed=False)
+    txt = ndb.TextProperty()
     datetime = ndb.DateTimeProperty()
     date = ndb.DateProperty()
     email = Email()
@@ -85,6 +87,8 @@ class ModelFormTests(GAETestCase):
                              decimal='0.0001',
                              currency='-0.01',
                              str='a' * 501,
+                             str_not_indexed='a' * 501,
+                             txt='a' * 501,
                              email='foo@bar',
                              datetime='a/09/30 23:56:56',
                              date='1999/08/a1')
@@ -104,6 +108,8 @@ class ModelFormTests(GAETestCase):
                                    currency='0.01',
                                    float_bounded='2.2',
                                    str='a',
+                                   str_not_indexed='b',
+                                   txt='t',
                                    email='foo@bar.com',
                                    datetime='09/30/2000 23:56:56',
                                    date='08/01/1999')
@@ -111,10 +117,12 @@ class ModelFormTests(GAETestCase):
                         'i': 1,
                         'float_bounded': 2.2,
                         'f': 2.1,
-                        'email':'foo@bar.com',
+                        'email': 'foo@bar.com',
                         'decimal': Decimal('0.001'),
                         'currency': Decimal('0.01'),
                         'str': 'a',
+                        'str_not_indexed': 'b',
+                        'txt': 't',
                         'datetime': datetime.datetime(2000, 10, 1, 2, 56, 56),
                         'date': datetime.date(1999, 8, 1)}
         model = model_form.populate_model()
@@ -127,16 +135,20 @@ class ModelFormTests(GAETestCase):
                                    float_bounded='2.5',
                                    email='foo@bar.com',
                                    str='b',
+                                   str_not_indexed='b',
+                                   txt='t',
                                    datetime='09/30/2000 23:56:56',
                                    date='08/01/1999')
         property_dct = {'integer': 2,
                         'i': 1,
                         'f': 2.1,
-                        'email':'foo@bar.com',
+                        'email': 'foo@bar.com',
                         'float_bounded': 2.5,
                         'decimal': Decimal('3.001'),
                         'currency': Decimal('4.01'),
                         'str': 'b',
+                        'str_not_indexed': 'b',
+                        'txt': 't',
                         'datetime': datetime.datetime(2000, 10, 1, 2, 56, 56),
                         'date': datetime.date(1999, 8, 1)}
         model_form.populate_model(model)
@@ -152,6 +164,8 @@ class ModelFormTests(GAETestCase):
                           float_bounded=2.6,
                           email='foo@bar.com',
                           str='a',
+                          str_not_indexed='b',
+                          txt='t',
                           datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
                           date=datetime.datetime(1999, 8, 1))
         localized_dct = model_form.populate_form(model)
@@ -159,10 +173,12 @@ class ModelFormTests(GAETestCase):
                               'i': '1',
                               'float_bounded': '2.6',
                               'f': '2.1',
-                              'email':'foo@bar.com',
+                              'email': 'foo@bar.com',
                               'decimal': '0.001',
                               'currency': '0.01',
                               'str': 'a',
+                              'str_not_indexed': 'b',
+                              'txt': 't',
                               'datetime': '09/30/2000 20:56:56',
                               'date': '08/01/1999'}, localized_dct)
 
