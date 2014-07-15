@@ -126,7 +126,7 @@ class StringField(BaseField):
     def validate_field(self, value):
         if self.max_len and value and len(value) > self.max_len:
             return _('Has %(len)s characters and it must have less than %(max_len)s') % {'len': len(value),
-                                                                                        'max_len': self.max_len}
+                                                                                         'max_len': self.max_len}
 
         return super(StringField, self).validate_field(value)
 
@@ -336,7 +336,11 @@ class Form(object):
     _fields = ()
     __metaclass__ = _FormMetaclass
 
+
     def __init__(self, **kwargs):
+        self.fill(**kwargs)
+
+    def fill(self, **kwargs):
         for k, v in self._fields.iteritems():
             if k in kwargs:
                 setattr(self, k, kwargs[k])

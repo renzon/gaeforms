@@ -6,10 +6,11 @@ import datetime
 
 import webapp2
 
-from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, FloatField, \
+from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, \
+    FloatField, \
     EmailField
 
-#workaroung to enable i18n tests
+# workaroung to enable i18n tests
 app = webapp2.WSGIApplication(
     [webapp2.Route('/', None, name='upload_handler')])
 
@@ -51,32 +52,40 @@ class FormTests(unittest.TestCase):
         self.assertDictEqual({'attr1': mock1, 'attr2': mock2}, FormExample._fields)
 
     def test_instance_values(self):
-        v1 = FormExample(attr1='a', attr2='b')
+        form = FormExample(attr1='a', attr2='b')
         v2 = FormExample(attr1='c', attr2='d')
-        self.assertTupleEqual(('a', 'b'), (v1.attr1, v1.attr2))
+        self.assertTupleEqual(('a', 'b'), (form.attr1, form.attr2))
         self.assertTupleEqual(('c', 'd'), (v2.attr1, v2.attr2))
 
 
     def test_validate(self):
-        v1 = FormExample(attr1=True, attr2=True)
-        self.assertDictEqual({}, v1.validate())
-        v1 = FormExample(attr1=False, attr2=True)
-        self.assertDictEqual({'attr1': error_msg('attr1')}, v1.validate())
-        v1 = FormExample(attr1=True, attr2=False)
-        self.assertDictEqual({'attr2': error_msg('attr2')}, v1.validate())
-        v1 = FormExample(attr1=False, attr2=False)
-        self.assertDictEqual({'attr1': error_msg('attr1'), 'attr2': error_msg('attr2')}, v1.validate())
+        form = FormExample(attr1=True, attr2=True)
+        self.assertDictEqual({}, form.validate())
+        form = FormExample(attr1=False, attr2=True)
+        self.assertDictEqual({'attr1': error_msg('attr1')}, form.validate())
+        form = FormExample(attr1=True, attr2=False)
+        self.assertDictEqual({'attr2': error_msg('attr2')}, form.validate())
+        form = FormExample(attr1=False, attr2=False)
+        self.assertDictEqual({'attr1': error_msg('attr1'), 'attr2': error_msg('attr2')}, form.validate())
+
 
     def test_normalize(self):
-        v1 = FormExample(attr1='1', attr2='2')
-        self.assertDictEqual({'attr1': 1, 'attr2': 2}, v1.normalize())
+        form = FormExample(attr1='1', attr2='2')
+        self.assertDictEqual({'attr1': 1, 'attr2': 2}, form.normalize())
 
     def test_localize(self):
-        v1 = FormExample()
-        self.assertFalse(hasattr(v1, 'attr1'))
-        self.assertFalse(hasattr(v1, 'attr2'))
-        self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, v1.localize(attr1=1, attr2=2))
-        self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, {'attr1': v1.attr1, 'attr2': v1.attr2})
+        form = FormExample()
+        self.assertFalse(hasattr(form, 'attr1'))
+        self.assertFalse(hasattr(form, 'attr2'))
+        self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, form.localize(attr1=1, attr2=2))
+        self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, {'attr1': form.attr1, 'attr2': form.attr2})
+
+    def test_fill(self):
+        form = FormExample()
+        self.assertFalse(hasattr(form, 'attr1'))
+        self.assertFalse(hasattr(form, 'attr2'))
+        form.fill(attr1='one', attr2='two')
+        self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, {'attr1': form.attr1, 'attr2': form.attr2})
 
 
 class BaseFieldTests(unittest.TestCase):
@@ -139,6 +148,7 @@ class BaseFieldTests(unittest.TestCase):
     def test_repeated_normalization(self):
         field = MockField(repeated=True)
         self.assertListEqual([1, 2, 3], field.normalize(['1', '2', '3']))
+
 
 class EmailFieldTests(unittest.TestCase):
     def test_validate(self):
@@ -302,7 +312,7 @@ class StringFieldTests(unittest.TestCase):
 
     def test_str_with_more_than_500_chars_but_with_no_max(self):
         field = StringField(max_len=None)
-        self.assertIsNone( field.validate_field('a' * 501))
+        self.assertIsNone(field.validate_field('a' * 501))
 
 
 class DateFieldTests(unittest.TestCase):
@@ -342,7 +352,8 @@ class DateTimeFieldTests(unittest.TestCase):
         field = DateTimeField()
         field._set_attr_name('d')
         self.assertIsNone(field.validate('09/30/2000 23:59:59'))
-        self.assertEqual('Invalid datetime. Must be on format MM/dd/YYYY HH:mm:ss', field.validate('09/30/2000 23:59:a'))
+        self.assertEqual('Invalid datetime. Must be on format MM/dd/YYYY HH:mm:ss',
+                         field.validate('09/30/2000 23:59:a'))
 
     def test_date_assignment(self):
         field = DateTimeField()
