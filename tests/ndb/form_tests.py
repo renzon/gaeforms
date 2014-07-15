@@ -102,7 +102,7 @@ class ModelFormTests(GAETestCase):
                                  'date']),
                             set(form.validate().keys()))
 
-    def test_populate_model(self):
+    def test_fill_model(self):
         model_form = ModelFormMock(integer='1',
                                    decimal='0.001',
                                    currency='0.01',
@@ -125,7 +125,7 @@ class ModelFormTests(GAETestCase):
                         'txt': 't',
                         'datetime': datetime.datetime(2000, 10, 1, 2, 56, 56),
                         'date': datetime.date(1999, 8, 1)}
-        model = model_form.populate_model()
+        model = model_form.fill_model()
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         model_key = model.put()
@@ -151,12 +151,12 @@ class ModelFormTests(GAETestCase):
                         'txt': 't',
                         'datetime': datetime.datetime(2000, 10, 1, 2, 56, 56),
                         'date': datetime.date(1999, 8, 1)}
-        model_form.populate_model(model)
+        model_form.fill_model(model)
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         self.assertEqual(model_key, model.key)
 
-    def test_populate_form(self):
+    def test_fill_with_model(self):
         model_form = ModelFormMock()
         model = ModelMock(integer=1,
                           decimal=Decimal('0.001'),
@@ -168,19 +168,15 @@ class ModelFormTests(GAETestCase):
                           txt='t',
                           datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
                           date=datetime.datetime(1999, 8, 1))
-        localized_dct = model_form.populate_form(model)
-        self.assertDictEqual({'integer': '1',
-                              'i': '1',
-                              'float_bounded': '2.6',
-                              'f': '2.1',
-                              'email': 'foo@bar.com',
-                              'decimal': '0.001',
-                              'currency': '0.01',
-                              'str': 'a',
-                              'str_not_indexed': 'b',
-                              'txt': 't',
-                              'datetime': '09/30/2000 20:56:56',
-                              'date': '08/01/1999'}, localized_dct)
+        localized_dct = model_form.fill_with_model(model)
+        expected_dct = {'integer': '1', 'i': '1', 'float_bounded': '2.6', 'f': '2.1', 'email': 'foo@bar.com',
+                        'decimal': '0.001', 'currency': '0.01', 'str': 'a', 'str_not_indexed': 'b', 'txt': 't',
+                        'datetime': '09/30/2000 20:56:56', 'date': '08/01/1999'}
+        self.assertDictEqual(expected_dct, localized_dct)
+
+        expected_dct['id'] = model.put().id()
+        localized_dct = model_form.fill_with_model(model)
+        self.assertDictEqual(expected_dct, localized_dct)
 
     def test_populate_form_model_with_defaults(self):
         class ModelWithDefaults(ndb.Model):
@@ -200,7 +196,7 @@ class ModelFormTests(GAETestCase):
         form = FormDefaults()
         model = ModelWithDefaults()
         model.put()
-        form.populate_form(model)
+        form.fill_with_model(model)
 
         self.assertEqual('', form.integer)
         self.assertEqual('', form.dtime)  # different because of timezone

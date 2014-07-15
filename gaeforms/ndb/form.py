@@ -86,7 +86,7 @@ class ModelForm(Form):
     _include = None
     _exclude = None
 
-    def populate_model(self, model=None):
+    def fill_model(self, model=None):
         """
         Populates a model with normalized properties. If no model is provided (None) a new one will be created.
         :param model: model to be populade
@@ -98,12 +98,15 @@ class ModelForm(Form):
             return model
         return self._model_class(**normalized_dct)
 
-    def populate_form(self, model):
+    def fill_with_model(self, model):
         """
         Populates this form with localized properties from model.
         :param model: model
         :return: dict with localized properties
         """
         model_dct = model.to_dict(include=self._fields.keys())
-        return self.localize(**model_dct)
+        localized_dct = self.localize(**model_dct)
+        if model.key:
+            localized_dct['id']=model.key.id()
+        return localized_dct
 
