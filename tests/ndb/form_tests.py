@@ -5,6 +5,7 @@ import unittest
 import datetime
 
 from google.appengine.ext import ndb
+from google.appengine.ext.ndb.polymodel import PolyModel
 import webapp2
 from webapp2_extras import i18n
 
@@ -66,6 +67,16 @@ class ModelFormTests(GAETestCase):
         form = ModelFormOverriding(integer='0', float_bounded='2.2')
         self.assertDictEqual({}, form.validate(),
                                'integer with no bounds should be used once it is overriden on ModelValidatorOverriging')
+
+    def test_polymodel(self):
+        class Poly(PolyModel):
+            title = ndb.StringProperty()
+
+        class PolyForm(ModelForm):
+            _model_class = Poly
+
+        form = PolyForm(title='Foo')
+        self.assertDictEqual({'title': 'Foo'}, form.normalize())
 
     def test_validate(self):
         form = ModelFormMock(integer='1', float_bounded='2.0')
