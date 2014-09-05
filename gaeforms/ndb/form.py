@@ -44,14 +44,14 @@ def make_include_function(include, exclude):
         raise InvalidParams('_include and _exclude can not be not None at same time')
 
     def should_include(key):
-        return True
+        return key != 'class'
 
     if include is not None:
         def should_include(key):
             return key in include
     elif exclude is not None:
         def should_include(key):
-            return key not in exclude
+            return key not in exclude and key != 'class'
 
     return should_include
 
@@ -107,6 +107,6 @@ class ModelForm(Form):
         model_dct = model.to_dict(include=self._fields.keys())
         localized_dct = self.localize(**model_dct)
         if model.key:
-            localized_dct['id']=model.key.id()
+            localized_dct['id'] = model.key.id()
         return localized_dct
 
