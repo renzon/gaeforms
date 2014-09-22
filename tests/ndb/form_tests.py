@@ -189,6 +189,29 @@ class ModelFormTests(GAETestCase):
         localized_dct = model_form.fill_with_model(model)
         self.assertDictEqual(expected_dct, localized_dct)
 
+
+    def test_fill_with_model_explicit_filds(self):
+        model_form = ModelFormMock()
+        model = ModelMock(integer=1,
+                          decimal=Decimal('0.001'),
+                          currency=Decimal('0.01'),
+                          float_bounded=2.6,
+                          email='foo@bar.com',
+                          str='a',
+                          str_not_indexed='b',
+                          txt='t',
+                          datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
+                          date=datetime.datetime(1999, 8, 1))
+        localized_dct = model_form.fill_with_model(model, 'integer')
+        self.assertDictEqual({'integer': '1'}, localized_dct)
+        localized_dct = model_form.fill_with_model(model, 'integer', 'txt')
+        self.assertDictEqual({'integer': '1', 'txt': 't'}, localized_dct)
+
+        id = model.put().id()
+        localized_dct = model_form.fill_with_model(model, 'integer', 'txt')
+        self.assertDictEqual({'id': id, 'integer': '1', 'txt': 't'}, localized_dct)
+
+
     def test_populate_form_model_with_defaults(self):
         class ModelWithDefaults(ndb.Model):
             integer = IntegerBounded(lower=1, upper=2)

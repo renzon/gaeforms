@@ -18,7 +18,7 @@ request = webapp2.Request({'SERVER_NAME': 'test', 'SERVER_PORT': 80,
                            'wsgi.url_scheme': 'http'})
 request.app = app
 app.set_globals(app=app, request=request)
-#end fo workaround
+# end fo workaround
 
 
 def error_msg(attr_name):
@@ -73,12 +73,25 @@ class FormTests(unittest.TestCase):
         form = FormExample(attr1='1', attr2='2')
         self.assertDictEqual({'attr1': 1, 'attr2': 2}, form.normalize())
 
+    def test_normalize(self):
+        form = FormExample(attr1='1', attr2='2')
+        self.assertDictEqual({'attr1': 1, 'attr2': 2}, form.normalize())
+
+
     def test_localize(self):
         form = FormExample()
         self.assertFalse(hasattr(form, 'attr1'))
         self.assertFalse(hasattr(form, 'attr2'))
         self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, form.localize(attr1=1, attr2=2))
         self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, {'attr1': form.attr1, 'attr2': form.attr2})
+
+    def test_localize_with_explicity_fields(self):
+        form = FormExample()
+        self.assertFalse(hasattr(form, 'attr1'))
+        self.assertFalse(hasattr(form, 'attr2'))
+        self.assertDictEqual({'attr1': 'one'}, form.localize('attr1', attr1=1, attr2=2))
+        self.assertDictEqual({'attr2': 'two'}, form.localize('attr2', attr1=1, attr2=2))
+        self.assertDictEqual({'attr1': 'one', 'attr2': 'two'}, form.localize('attr1', 'attr2', attr1=1, attr2=2))
 
     def test_fill(self):
         form = FormExample()

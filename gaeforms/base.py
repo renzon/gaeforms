@@ -363,12 +363,14 @@ class Form(object):
     def normalize(self):
         return {k: self._normalize_helper(k, v) for k, v in self._fields.iteritems()}
 
-    def localize(self, **obj_values):
+    def localize(self, *fields, **obj_values):
         def _localize(k, descriptor):
             value = obj_values.get(k)
             setattr(self, k, descriptor.localize(value))
             return getattr(self, k)
 
+        if fields:
+            return {k: _localize(k, self._fields[k]) for k in fields}
         return {k: _localize(k, v) for k, v in self._fields.iteritems()}
 
 
