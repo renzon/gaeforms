@@ -8,7 +8,7 @@ import webapp2
 
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, \
     FloatField, \
-    EmailField
+    EmailField, BooleanField
 
 # workaroung to enable i18n tests
 app = webapp2.WSGIApplication(
@@ -172,6 +172,40 @@ class EmailFieldTests(unittest.TestCase):
         self.assertEqual('Invalid email', field.validate('a@'))
         self.assertEqual('Invalid email', field.validate('a@com'))
         self.assertIsNone(field.validate('a@google.com'))
+
+class BooleanFieldTests(unittest.TestCase):
+    def test_normalization(self):
+        field = BooleanField()
+        self.assertIsNone(field.normalize(None))
+        self.assertIsNone(field.normalize(''))
+        self.assertTrue(field.normalize('true'))
+        self.assertTrue(field.normalize('True'))
+        self.assertTrue(field.normalize('TRUE'))
+        self.assertFalse(field.normalize('false'))
+        self.assertFalse(field.normalize('False'))
+        self.assertFalse(field.normalize('FALSE'))
+
+    def test_validation(self):
+        field = BooleanField()
+        field._set_attr_name('n')
+        self.assertIsNone(field.validate(None))
+        self.assertIsNone(field.validate(''))
+        self.assertIsNone(field.validate('true'))
+        self.assertIsNone(field.validate('True'))
+        self.assertIsNone(field.validate('TRUE'))
+        self.assertIsNone(field.validate('False'))
+        self.assertIsNone(field.validate('false'))
+        self.assertIsNone(field.validate('FALSE'))
+        self.assertEqual('Must be true or false', field.validate('foo'))
+        self.assertEqual('Must be true or false', field.validate('not false'))
+        self.assertEqual('Must be true or false', field.validate('not true'))
+
+    def test_localization(self):
+        field = BooleanField()
+        field._set_attr_name('n')
+        self.assertTrue(field.localize(True))
+        self.assertFalse(field.localize(False))
+
 
 
 class IntergerFieldTests(unittest.TestCase):

@@ -175,6 +175,32 @@ class IntegerField(BaseField):
         return super(IntegerField, self).localize_field(value)
 
 
+class BooleanField(BaseField):
+    def validate_field(self, value):
+        try:
+            value = self.normalize_field(value)
+            return super(BooleanField, self).validate_field(value)
+        except:
+            return _('Must be true or false')
+
+    def normalize_field(self, value):
+        if value == '':
+            value = None
+        elif value is not None:
+            value=value.upper()
+            if value=='TRUE':
+                return True
+            elif value=='FALSE':
+                return False
+            raise Exception(msg='Should be True or False')
+
+        return super(BooleanField, self).normalize_field(value)
+
+    def localize(self, value):
+        return value
+
+
+
 class FloatField(BaseField):
     def __init__(self, required=False, default=None, repeated=False, choices=None, lower=None, upper=None):
         super(FloatField, self).__init__(required, default, repeated, choices)
