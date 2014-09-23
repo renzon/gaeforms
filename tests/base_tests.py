@@ -3,12 +3,13 @@ from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import unittest
 import datetime
+from google.appengine.ext.ndb import Model, Key
 
 import webapp2
 
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, \
     FloatField, \
-    EmailField, BooleanField
+    EmailField, BooleanField, KeyField
 
 # workaroung to enable i18n tests
 app = webapp2.WSGIApplication(
@@ -173,6 +174,7 @@ class EmailFieldTests(unittest.TestCase):
         self.assertEqual('Invalid email', field.validate('a@com'))
         self.assertIsNone(field.validate('a@google.com'))
 
+
 class BooleanFieldTests(unittest.TestCase):
     def test_normalization(self):
         field = BooleanField()
@@ -206,6 +208,73 @@ class BooleanFieldTests(unittest.TestCase):
         self.assertTrue(field.localize(True))
         self.assertFalse(field.localize(False))
 
+
+class KeyFieldTests(unittest.TestCase):
+    def test_normalization_without_kind(self):
+        class ModelMock(Model):
+            pass
+
+        key = Key(ModelMock, 1)
+
+        field = KeyField()
+        self.assertIsNone(field.normalize(None))
+        self.assertIsNone(field.normalize(''))
+        self.assertEqual(key, field.normalize(key))
+        self.assertEqual(key, field.normalize(key.urlsafe()))
+        self.assertRaises(Exception, field.normalize, '1')
+        self.assertRaises(Exception, field.normalize, 'abcd')
+
+    def test_normalization_wit_kind(self):
+        class ModelMock(Model):
+            pass
+
+        key = Key(ModelMock, 1)
+
+        field = KeyField(ModelMock)
+        self.assertIsNone(field.normalize(None))
+        self.assertIsNone(field.normalize(''))
+        self.assertEqual(key, field.normalize(key))
+        self.assertEqual(key, field.normalize(key.urlsafe()))
+        self.assertEqual(key, field.normalize('1'))
+        self.assertRaises(Exception, field.normalize, 'abcd')
+
+    def test_validation_without_kind(self):
+        class ModelMock(Model):
+            pass
+
+        key = Key(ModelMock, 1)
+
+        field = KeyField()
+        self.assertIsNone(field.validate(None))
+        self.assertIsNone(field.validate(''))
+        self.assertIsNone(field.validate(key))
+        self.assertIsNone(field.validate(key.urlsafe()))
+        self.assertEqual("Key's kind should be defined", field.validate('1'))
+        self.assertEqual('Invalid key', field.validate('abcd'))
+
+    def test_validation_with_kind(self):
+        class ModelMock(Model):
+            pass
+
+        key = Key(ModelMock, 1)
+
+        field = KeyField(ModelMock)
+        self.assertIsNone(field.validate(None))
+        self.assertIsNone(field.validate(''))
+        self.assertIsNone(field.validate(key))
+        self.assertIsNone(field.validate(key.urlsafe()))
+        self.assertIsNone(field.validate('1'))
+        self.assertEqual('Invalid key', field.validate('abcd'))
+
+
+    def test_localization(self):
+        class ModelMock(Model):
+            pass
+
+        key = Key(ModelMock, 1)
+        field = KeyField()
+        field._set_attr_name('n')
+        self.assertEqual(1, field.localize(key))
 
 
 class IntergerFieldTests(unittest.TestCase):

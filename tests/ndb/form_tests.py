@@ -38,9 +38,14 @@ class IntegerModelForm(ModelForm):
     _model_class = IntegerModelMock
 
 
+class AnotherModelMock(ndb.Model):
+    pass
+
+
 class ModelMock(ndb.Model):
     integer = IntegerBounded(required=True, lower=1, upper=2)
-    b=ndb.BooleanProperty()
+    another = ndb.KeyProperty(AnotherModelMock)
+    b = ndb.BooleanProperty()
     i = ndb.IntegerProperty(default=1)
     f = ndb.FloatProperty(default=2.1)
     float_bounded = FloatBounded(required=True, lower=1.1, upper=3.4)
@@ -118,6 +123,7 @@ class ModelFormTests(GAETestCase):
         model_form = ModelFormMock(integer='1',
                                    decimal='0.001',
                                    currency='0.01',
+                                   another='1',
                                    b='true',
                                    float_bounded='2.2',
                                    str='a',
@@ -128,7 +134,8 @@ class ModelFormTests(GAETestCase):
                                    date='08/01/1999')
         property_dct = {'integer': 1,
                         'i': 1,
-                        'b':True,
+                        'another': ndb.Key(AnotherModelMock, 1),
+                        'b': True,
                         'float_bounded': 2.2,
                         'f': 2.1,
                         'email': 'foo@bar.com',
@@ -146,6 +153,7 @@ class ModelFormTests(GAETestCase):
         model_form = ModelFormMock(integer='2',
                                    decimal='3.001',
                                    b='false',
+                                   another='1',
                                    currency='4.01',
                                    float_bounded='2.5',
                                    email='foo@bar.com',
@@ -156,7 +164,8 @@ class ModelFormTests(GAETestCase):
                                    date='08/01/1999')
         property_dct = {'integer': 2,
                         'i': 1,
-                        'b':False,
+                        'b': False,
+                        'another': ndb.Key(AnotherModelMock, 1),
                         'f': 2.1,
                         'email': 'foo@bar.com',
                         'float_bounded': 2.5,
@@ -173,12 +182,13 @@ class ModelFormTests(GAETestCase):
         self.assertEqual(model_key, model.key)
 
     def test_fill_with_model(self):
-        self.maxDiff=None
+        self.maxDiff = None
         model_form = ModelFormMock()
         model = ModelMock(integer=1,
                           decimal=Decimal('0.001'),
                           currency=Decimal('0.01'),
                           b=False,
+                          another=ndb.Key(AnotherModelMock, 1),
                           float_bounded=2.6,
                           email='foo@bar.com',
                           str='a',
@@ -187,7 +197,9 @@ class ModelFormTests(GAETestCase):
                           datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
                           date=datetime.datetime(1999, 8, 1))
         localized_dct = model_form.fill_with_model(model)
-        expected_dct = {'b':False,'integer': '1', 'i': '1', 'float_bounded': '2.6', 'f': '2.1', 'email': 'foo@bar.com',
+        expected_dct = {'b': False, 'integer': '1', 'i': '1', 'float_bounded': '2.6', 'f': '2.1',
+                        'email': 'foo@bar.com',
+                        'another': 1,
                         'decimal': '0.001', 'currency': '0.01', 'str': 'a', 'str_not_indexed': 'b', 'txt': 't',
                         'datetime': '09/30/2000 20:56:56', 'date': '08/01/1999'}
         self.assertDictEqual(expected_dct, localized_dct)
@@ -197,7 +209,7 @@ class ModelFormTests(GAETestCase):
         self.assertDictEqual(expected_dct, localized_dct)
 
 
-    def test_fill_with_model_explicit_filds(self):
+    def test_fill_with_model_explicit_fields(self):
         model_form = ModelFormMock()
         model = ModelMock(integer=1,
                           b=True,

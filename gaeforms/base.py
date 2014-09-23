@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import datetime
+from google.appengine.ext import ndb
 
 from webapp2_extras.i18n import gettext as _
 
@@ -139,6 +140,57 @@ class EmailField(BaseField):
         return super(EmailField, self).validate_field(value)
 
 
+class KeyField(BaseField):
+    def __init__(self, kind=None, required=False, default=None, repeated=False, choices=None):
+        super(KeyField, self).__init__(required, default, repeated, choices)
+        self.kind = kind
+
+    def set_options(self, model_property):
+        super(KeyField, self).set_options(model_property)
+        self.kind = model_property._kind
+
+    def validate_field(self, value):
+        if value == '':
+            value = None
+        elif value is not None:
+            if isinstance(value, basestring):
+                try:
+                    id = int(value)
+                    if self.kind:
+                        value = ndb.Key(self.kind, id)
+                    else:
+                        return _("Key's kind should be defined")
+                except ValueError:
+                    try:
+                        value = ndb.Key(urlsafe=value)
+                    except:
+                        return _('Invalid key')
+        return super(KeyField, self).validate_field(value)
+
+    def normalize_field(self, value):
+        if value == '':
+            value = None
+        elif value is not None:
+            if isinstance(value, basestring):
+                try:
+                    id = int(value)
+                    if self.kind:
+                        value = ndb.Key(self.kind, id)
+                    else:
+                        raise Exception("Key's kind should be defined")
+                except ValueError:
+                    try:
+                        value = ndb.Key(urlsafe=value)
+                    except:
+                        raise Exception('Invalid key')
+        return super(KeyField, self).normalize_field(value)
+
+    def localize_field(self, value):
+        if value:
+            return value.id()
+        return super(KeyField, self).localize_field(value)
+
+
 class IntegerField(BaseField):
     def __init__(self, required=False, default=None, repeated=False, choices=None, lower=None, upper=None):
         super(IntegerField, self).__init__(required, default, repeated, choices)
@@ -187,10 +239,10 @@ class BooleanField(BaseField):
         if value == '':
             value = None
         elif value is not None:
-            value=value.upper()
-            if value=='TRUE':
+            value = value.upper()
+            if value == 'TRUE':
                 return True
-            elif value=='FALSE':
+            elif value == 'FALSE':
                 return False
             raise Exception(msg='Should be True or False')
 
@@ -198,7 +250,6 @@ class BooleanField(BaseField):
 
     def localize(self, value):
         return value
-
 
 
 class FloatField(BaseField):
