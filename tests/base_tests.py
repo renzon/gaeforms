@@ -182,9 +182,11 @@ class BooleanFieldTests(unittest.TestCase):
         self.assertIsNone(field.normalize(''))
         self.assertTrue(field.normalize('true'))
         self.assertTrue(field.normalize('True'))
+        self.assertTrue(field.normalize(True))
         self.assertTrue(field.normalize('TRUE'))
         self.assertFalse(field.normalize('false'))
         self.assertFalse(field.normalize('False'))
+        self.assertFalse(field.normalize(False))
         self.assertFalse(field.normalize('FALSE'))
 
     def test_validation(self):
