@@ -230,7 +230,8 @@ class IntegerField(BaseField):
 class BooleanField(BaseField):
     def validate_field(self, value):
         try:
-            value = self.normalize_field(value)
+            if not isinstance(value, bool):
+                value = self.normalize_field(value)
             return super(BooleanField, self).validate_field(value)
         except:
             return _('Must be true or false')
