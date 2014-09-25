@@ -143,7 +143,7 @@ class StringField(BaseField):
         return super(StringField, self).validate_field(value)
 
 
-class EmailField(BaseField):
+class EmailField(StringField):
     def validate_field(self, value):
         if value and not re.match(r'[^@]+@[^@]+\.[^@]+', value):
             return _('Invalid email')
