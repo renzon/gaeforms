@@ -275,6 +275,8 @@ class FloatField(BaseField):
             return _('Must be a number')
 
     def normalize_field(self, value):
+        if isinstance(value,(int,float)):
+            return value
         if value == '':
             value = None
         elif value is not None:

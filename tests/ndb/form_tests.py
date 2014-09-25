@@ -90,7 +90,7 @@ class ModelFormTests(GAETestCase):
         form = ModelFormMock()
         self.assertSetEqual(set(['integer', 'float_bounded']), set(form.validate().keys()))
         form = ModelFormMock(integer='0', float_bounded=3.41)
-        self.assertSetEqual(set(['integer', 'float_bounded']), set(form.validate().keys()))
+        self.assertSetEqual(set(['integer']), set(form.validate().keys()))
         form = ModelFormMock(integer='1',
                              decimal='0.001',
                              currency='0.01',
