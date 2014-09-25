@@ -12,6 +12,8 @@ from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringFie
     EmailField, BooleanField, KeyField
 
 # workaroung to enable i18n tests
+from util import GAETestCase
+
 app = webapp2.WSGIApplication(
     [webapp2.Route('/', None, name='upload_handler')])
 
@@ -214,16 +216,18 @@ class BooleanFieldTests(unittest.TestCase):
         self.assertFalse(field.localize(False))
 
 
-class KeyFieldTests(unittest.TestCase):
+class KeyFieldTests(GAETestCase):
     def test_normalization_without_kind(self):
         class ModelMock(Model):
             pass
 
         key = Key(ModelMock, 1)
-
+        model_mock = ModelMock()
+        model_mock.put()
         field = KeyField()
         self.assertIsNone(field.normalize(None))
         self.assertIsNone(field.normalize(''))
+        self.assertEqual(model_mock.key,field.normalize(model_mock))
         self.assertEqual(key, field.normalize(key))
         self.assertEqual(key, field.normalize(key.urlsafe()))
         self.assertRaises(Exception, field.normalize, '1')
@@ -486,7 +490,7 @@ class DateTimeFieldTests(unittest.TestCase):
         field = DateTimeField()
         field._set_attr_name('d')
         self.assertIsNone(field.validate('09/30/2000 23:59:59'))
-        self.assertIsNone(field.validate( datetime.datetime(2000, 10, 1, 2, 0, 0)))
+        self.assertIsNone(field.validate(datetime.datetime(2000, 10, 1, 2, 0, 0)))
         self.assertEqual('Invalid datetime. Must be on format MM/dd/YYYY HH:mm:ss',
                          field.validate('09/30/2000 23:59:a'))
 

@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import datetime
 from google.appengine.ext import ndb
+from google.appengine.ext.ndb import Model
 
 from webapp2_extras.i18n import gettext as _
 
@@ -165,6 +166,8 @@ class KeyField(BaseField):
                         value = ndb.Key(urlsafe=value)
                     except:
                         return _('Invalid key')
+            elif isinstance(value,Model) and value.key:
+                return
         return super(KeyField, self).validate_field(value)
 
     def normalize_field(self, value):
@@ -183,6 +186,8 @@ class KeyField(BaseField):
                         value = ndb.Key(urlsafe=value)
                     except:
                         raise Exception('Invalid key')
+            elif isinstance(value,Model):
+                return value.key
         return super(KeyField, self).normalize_field(value)
 
     def localize_field(self, value):
