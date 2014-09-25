@@ -217,6 +217,8 @@ class IntegerField(BaseField):
     def normalize_field(self, value):
         if value == '':
             value = None
+        if isinstance(value,int):
+            return value
         elif value is not None:
             value = int(i18n.get_i18n().parse_decimal(value))
         return super(IntegerField, self).normalize_field(value)
