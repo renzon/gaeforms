@@ -448,7 +448,9 @@ class DateFieldTests(unittest.TestCase):
     def test_normalization(self):
         field = DateField()
         dt = field.normalize('09/30/2000')
-        self.assertEqual(datetime.date(2000, 9, 30), dt)
+        datetime_date = datetime.date(2000, 9, 30)
+        self.assertEqual(datetime_date, dt)
+        self.assertEqual(datetime_date, field.normalize(datetime_date))
 
     def test_localization(self):
         field = DateField()
@@ -459,6 +461,7 @@ class DateFieldTests(unittest.TestCase):
         field = DateField()
         field._set_attr_name('d')
         self.assertIsNone(field.validate('09/30/2000'))
+        self.assertIsNone(field.validate(datetime.date(2000, 9, 30)))
         self.assertEqual('Invalid date. Must be on format MM/dd/YYYY', field.validate('09/30/a'))
 
 
