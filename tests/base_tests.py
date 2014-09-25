@@ -9,7 +9,7 @@ import webapp2
 
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, \
     FloatField, \
-    EmailField, BooleanField, KeyField
+    EmailField, BooleanField, KeyField, CepField
 
 # workaroung to enable i18n tests
 from util import GAETestCase
@@ -500,3 +500,27 @@ class DateTimeFieldTests(unittest.TestCase):
         date = datetime.datetime(2000, 9, 30)
         dt = field.normalize(date)
         self.assertEqual(date, dt)
+
+class CepFieldTests(unittest.TestCase):
+    def test_normalization(self):
+        field = CepField()
+        self.assertIsNone( field.normalize(''))
+        self.assertIsNone( field.normalize(None))
+        self.assertEqual('12345678', field.normalize('12345-678'))
+        self.assertEqual('12345678', field.normalize('12345678'))
+
+    def test_localization(self):
+        field = CepField()
+        self.assertEqual('', field.localize(''))
+        self.assertEqual('', field.localize(None))
+        self.assertEqual('12345-678', field.localize('12345678'))
+
+    def test_validate(self):
+        field = CepField()
+        field._set_attr_name('d')
+        self.assertIsNone(field.validate('12345678'))
+        self.assertIsNone(field.validate('12345-678'))
+        self.assertIsNone(field.validate('1234567-8'))
+        self.assertEqual('CEP must have exactly 8 characters', field.validate('1234567'))
+        self.assertEqual('CEP must have exactly 8 characters', field.validate('123456789'))
+        self.assertEqual('CEP must contain only numbers', field.validate('1234567a'))

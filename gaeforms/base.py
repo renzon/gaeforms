@@ -166,7 +166,7 @@ class KeyField(BaseField):
                         value = ndb.Key(urlsafe=value)
                     except:
                         return _('Invalid key')
-            elif isinstance(value,Model) and value.key:
+            elif isinstance(value, Model) and value.key:
                 return
         return super(KeyField, self).validate_field(value)
 
@@ -186,7 +186,7 @@ class KeyField(BaseField):
                         value = ndb.Key(urlsafe=value)
                     except:
                         raise Exception('Invalid key')
-            elif isinstance(value,Model):
+            elif isinstance(value, Model):
                 return value.key
         return super(KeyField, self).normalize_field(value)
 
@@ -222,7 +222,7 @@ class IntegerField(BaseField):
     def normalize_field(self, value):
         if value == '':
             value = None
-        if isinstance(value,int):
+        if isinstance(value, int):
             return value
         elif value is not None:
             value = int(i18n.get_i18n().parse_decimal(value))
@@ -245,7 +245,7 @@ class BooleanField(BaseField):
     def normalize_field(self, value):
         if value == '':
             value = None
-        if isinstance(value,bool):
+        if isinstance(value, bool):
             return value
         elif value is not None:
             value = value.upper()
@@ -280,7 +280,7 @@ class FloatField(BaseField):
             return _('Must be a number')
 
     def normalize_field(self, value):
-        if isinstance(value,(int,float)):
+        if isinstance(value, (int, float)):
             return value
         if value == '':
             value = None
@@ -328,7 +328,7 @@ class DecimalField(BaseField):
 
 
     def normalize_field(self, value):
-        if isinstance(value,Decimal):
+        if isinstance(value, Decimal):
             return value
         if value == '':
             value = None
@@ -464,4 +464,27 @@ class Form(object):
         return {k: _localize(k, v) for k, v in self._fields.iteritems()}
 
 
+class CepField(BaseField):
+    def validate_field(self, value):
+        if value:
+            value = value.replace('-', '')
+            if len(value) != 8:
+                return _('CEP must have exactly 8 characters')
+            try:
+                int(value)
+            except:
+                return _('CEP must contain only numbers')
+        return super(CepField, self).validate_field(value)
 
+    def normalize_field(self, value):
+        if value:
+            return value.replace('-', '')
+        elif value == '':
+            value = None
+        return super(CepField, self).normalize_field(value)
+
+
+    def localize(self, value):
+        if value:
+            return '%s-%s' % (value[:5], value[5:])
+        return super(CepField, self).localize(value)
