@@ -323,6 +323,8 @@ class DecimalField(BaseField):
 
 
     def normalize_field(self, value):
+        if isinstance(value,Decimal):
+            return value
         if value == '':
             value = None
         elif value is not None:
