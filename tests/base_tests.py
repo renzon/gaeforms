@@ -471,7 +471,9 @@ class DateTimeFieldTests(unittest.TestCase):
         dt = field.normalize('09/30/2000 00:00:00')
         self.assertEqual(datetime.datetime(2000, 9, 30, 3, 0, 0), dt)
         dt = field.normalize('09/30/2000 23:00:00')
-        self.assertEqual(datetime.datetime(2000, 10, 1, 2, 0, 0), dt)
+        datetime_datetime = datetime.datetime(2000, 10, 1, 2, 0, 0)
+        self.assertEqual(datetime_datetime, dt)
+        self.assertEqual(datetime_datetime, field.normalize(datetime_datetime))
 
     def test_localization(self):
         field = DateTimeField()
@@ -484,6 +486,7 @@ class DateTimeFieldTests(unittest.TestCase):
         field = DateTimeField()
         field._set_attr_name('d')
         self.assertIsNone(field.validate('09/30/2000 23:59:59'))
+        self.assertIsNone(field.validate( datetime.datetime(2000, 10, 1, 2, 0, 0)))
         self.assertEqual('Invalid datetime. Must be on format MM/dd/YYYY HH:mm:ss',
                          field.validate('09/30/2000 23:59:a'))
 
