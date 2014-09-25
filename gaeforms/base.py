@@ -116,8 +116,10 @@ class BaseField(object):
 
 # Concrete fields
 class StringField(BaseField):
-    def __init__(self, required=False, default=None, repeated=False, choices=None, max_len=500):
+    def __init__(self, required=False, default=None, repeated=False, choices=None, max_len=500,exactly_len=None,min_len=None):
         super(StringField, self).__init__(required, default, repeated, choices)
+        self.min_len = min_len
+        self.exactly_len = exactly_len
         self.max_len = max_len
 
     def set_options(self, model_property):
@@ -126,9 +128,17 @@ class StringField(BaseField):
 
 
     def validate_field(self, value):
-        if self.max_len and value and len(value) > self.max_len:
-            return _('Has %(len)s characters and it must have less than %(max_len)s') % {'len': len(value),
-                                                                                         'max_len': self.max_len}
+        if value is not None:
+            len_value = len(value)
+            if self.exactly_len is not None and len_value !=self.exactly_len:
+                return _('Has %(len)s characters and it must have exactly %(exactly_len)s') % {'len': len_value,
+                                                                                             'exactly_len': self.exactly_len}
+            if self.max_len and len_value > self.max_len:
+                return _('Has %(len)s characters and it must have %(max_len)s or less') % {'len': len_value,
+                                                                                             'max_len': self.max_len}
+            if self.min_len and len_value < self.min_len:
+                return _('Has %(len)s characters and it must have %(min_len)s or more') % {'len': len_value,
+                                                                                             'min_len': self.min_len}
 
         return super(StringField, self).validate_field(value)
 

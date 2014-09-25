@@ -227,7 +227,7 @@ class KeyFieldTests(GAETestCase):
         field = KeyField()
         self.assertIsNone(field.normalize(None))
         self.assertIsNone(field.normalize(''))
-        self.assertEqual(model_mock.key,field.normalize(model_mock))
+        self.assertEqual(model_mock.key, field.normalize(model_mock))
         self.assertEqual(key, field.normalize(key))
         self.assertEqual(key, field.normalize(key.urlsafe()))
         self.assertRaises(Exception, field.normalize, '1')
@@ -441,11 +441,30 @@ class StringFieldTests(unittest.TestCase):
     def test_str_with_more_than_500_chars(self):
         field = StringField()
         field._set_attr_name('n')
-        self.assertEqual('Has 501 characters and it must have less than 500', field.validate_field('a' * 501))
+        self.assertEqual('Has 501 characters and it must have 500 or less', field.validate_field('a' * 501))
 
     def test_str_with_more_than_500_chars_but_with_no_max(self):
         field = StringField(max_len=None)
         self.assertIsNone(field.validate_field('a' * 501))
+
+    def test_str_max_len_chars(self):
+        field = StringField(max_len=10)
+        field._set_attr_name('n')
+        self.assertEqual('Has 11 characters and it must have 10 or less', field.validate_field('a' * 11))
+
+    def test_str_min_len_chars(self):
+        field = StringField(min_len=2)
+        field._set_attr_name('n')
+        self.assertEqual('Has 1 characters and it must have 2 or more', field.validate_field('a'))
+        self.assertIsNone(field.validate_field('aa'))
+        self.assertIsNone(field.validate_field('aaa'))
+
+    def test_str_exactly_len_chars(self):
+        field = StringField(exactly_len=10)
+        field._set_attr_name('n')
+        self.assertEqual('Has 11 characters and it must have exactly 10', field.validate_field('a' * 11))
+        self.assertEqual('Has 9 characters and it must have exactly 10', field.validate_field('a' * 9))
+        self.assertIsNone(field.validate_field('a' * 10))
 
 
 class DateFieldTests(unittest.TestCase):
@@ -501,11 +520,12 @@ class DateTimeFieldTests(unittest.TestCase):
         dt = field.normalize(date)
         self.assertEqual(date, dt)
 
+
 class CepFieldTests(unittest.TestCase):
     def test_normalization(self):
         field = CepField()
-        self.assertIsNone( field.normalize(''))
-        self.assertIsNone( field.normalize(None))
+        self.assertIsNone(field.normalize(''))
+        self.assertIsNone(field.normalize(None))
         self.assertEqual('12345678', field.normalize('12345-678'))
         self.assertEqual('12345678', field.normalize('12345678'))
 
