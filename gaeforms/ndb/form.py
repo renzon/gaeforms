@@ -103,6 +103,8 @@ class ModelForm(Form):
         """
         normalized_dct = self.normalize()
         if model:
+            if not isinstance(model, self._model_class):
+                raise ModelFormSecurityError('%s should be %s instance' % (model, self._model_class.__name__))
             model.populate(**normalized_dct)
             return model
         return self._model_class(**normalized_dct)

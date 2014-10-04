@@ -193,12 +193,13 @@ class ModelFormTests(GAETestCase):
 
         editable = EditableModel(name='editable')
         editable.put()
-        not_editable = EditableModel(name='not editable')
+        not_editable = NotEditableModel(name='not editable')
         not_editable.put()
 
         form = EditableModelForm(name='another name')
         self.assertRaises(ModelFormSecurityError, form.fill_model, not_editable)
         self.assertEqual('not editable', not_editable.name)
+
 
 
     def test_fill_with_model(self):
