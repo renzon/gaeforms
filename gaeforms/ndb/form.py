@@ -82,6 +82,13 @@ class _ModelFormMetaclass(_FormMetaclass):
         return super(_ModelFormMetaclass, cls).__new__(cls, class_to_be_created_name, bases, attrs)
 
 
+class ModelFormSecurityError(Exception):
+    """
+    Exception to raise when an security error ocurs on model form actions
+    """
+    pass
+
+
 class ModelForm(Form):
     __metaclass__ = _ModelFormMetaclass
     _model_class = None

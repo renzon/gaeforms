@@ -9,7 +9,7 @@ from google.appengine.ext.ndb.polymodel import PolyModel
 import webapp2
 from webapp2_extras import i18n
 
-from gaeforms.ndb.form import ModelForm, InvalidParams
+from gaeforms.ndb.form import ModelForm, InvalidParams, ModelFormSecurityError
 from gaeforms.ndb.property import IntegerBounded, SimpleCurrency, SimpleDecimal, FloatBounded, Email
 from util import GAETestCase
 from gaeforms.base import IntegerField
@@ -180,6 +180,26 @@ class ModelFormTests(GAETestCase):
         self.assertIsInstance(model, ModelMock)
         self.assertDictEqual(property_dct, model.to_dict())
         self.assertEqual(model_key, model.key)
+
+    def test_fill_model_attack(self):
+        class EditableModel(ndb.Model):
+            name = ndb.StringProperty()
+
+        class NotEditableModel(ndb.Model):
+            name = ndb.StringProperty()
+
+        class EditableModelForm(ModelForm):
+            _model_class = EditableModel
+
+        editable = EditableModel(name='editable')
+        editable.put()
+        not_editable = EditableModel(name='not editable')
+        not_editable.put()
+
+        form = EditableModelForm(name='another name')
+        self.assertRaises(ModelFormSecurityError, form.fill_model, not_editable)
+        self.assertEqual('not editable', not_editable.name)
+
 
     def test_fill_with_model(self):
         self.maxDiff = None
