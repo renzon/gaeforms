@@ -239,7 +239,7 @@ class IntegerField(BaseField):
         return super(IntegerField, self).normalize_field(value)
 
     def localize_field(self, value):
-        if value:
+        if value is not None:
             return i18n.get_i18n().format_number(value)
         return super(IntegerField, self).localize_field(value)
 
