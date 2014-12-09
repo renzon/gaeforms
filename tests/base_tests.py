@@ -337,6 +337,10 @@ class IntergerFieldTests(unittest.TestCase):
         self.assertListEqual(['1,000', '2,222,222', '3'], field.localize([1000, 2222222, 3]))
         self.assertListEqual([''], field.localize([None]))
 
+    def test_zero(self):
+        field = IntegerField()
+        self.assertEqual('0', field.localize(0))
+
 
 class FloatFieldTests(unittest.TestCase):
     def test_normalization(self):
