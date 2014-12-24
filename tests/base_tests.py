@@ -343,6 +343,11 @@ class IntergerFieldTests(unittest.TestCase):
 
 
 class FloatFieldTests(unittest.TestCase):
+    def test_zero(self):
+        field = FloatField()
+        self.assertEqual('0.0', field.localize(0.0))
+        self.assertEqual('0.0', field.localize(0))
+
     def test_normalization(self):
         field = FloatField()
         self.assertIsNone(field.normalize(None))
@@ -392,7 +397,12 @@ class FloatFieldTests(unittest.TestCase):
         self.assertEqual('Must be less than 1.3', field.validate('2'))
 
 
-class SimpleFloatFieldTests(unittest.TestCase):
+class DecimalFieldTests(unittest.TestCase):
+    def test_zero(self):
+        field = DecimalField()
+        self.assertEqual('0.0', field.localize(Decimal('0.0')))
+        self.assertEqual('0.0', field.localize(Decimal('0')))
+
     def test_normalization(self):
         field = DecimalField()
         self.assertIsNone(field.normalize(None))
