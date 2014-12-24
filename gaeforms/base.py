@@ -299,8 +299,8 @@ class FloatField(BaseField):
         return super(FloatField, self).normalize_field(value)
 
     def localize_field(self, value):
-        if value:
-            return i18n.get_i18n().format_number(value)
+        if value is not None and value != '':
+            return i18n.get_i18n().format_decimal(value)
         return super(FloatField, self).localize_field(value)
 
 
@@ -349,7 +349,7 @@ class DecimalField(BaseField):
         return super(DecimalField, self).normalize_field(value)
 
     def localize_field(self, value):
-        if value:
+        if value is not None and value != '':
             return i18n.get_i18n().format_decimal(value)
         return super(DecimalField, self).localize_field(value)
 
