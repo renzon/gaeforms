@@ -67,18 +67,19 @@ In case of existent Model, the second approach bellow can be used
 ## Approach 2: Model Based Form
 
 Let's say you already have a model class user as bellow:
-```
+
+```python
 class User(Model):
     name = StringProperty(required=True)
     age = IntegerProperty()
 ```
 
-You could use the user form from approach 1 to validate and normalize data to this model.
+You could use the **UserForm** from approach 1 to validate and normalize data to this model.
 Besides that it would be a boring work rewriting the properties which are already defined on model.
 To avoid this work you can inhiret from ModelForm. 
-You need specify the target model class on attributte **_model_class** as bellow:
+You need specify the target model class on attributte **_model_class** as bello:
 
-```
+```python
 class UserForm(ModelForm):
     _model_class = User
 ```
@@ -98,4 +99,27 @@ User(age=2, name='Joe')
 {'age': u'2', 'name': 'Joe'}
 >>> new_form.validate()
 {}
-``
+```
+
+These two approchs give you a clean way to validate your data.
+Let's see the already existing Fields on next section:
+
+# Existing 
+
+There are some existing Filds on lib to help on the tedious work of validating standart date.
+All of then come with interesting options:
+
+* required: If True the field will raise error if the value is None or empty string.
+* default: If value to be used as default in case the respective value is None or empty string
+* repeated: If True it indicates that the property has a list of values instead of a simple property
+* choices: If a list of defined values is provided, values not inside this list are not allowed
+
+Some fields have more interesting values, as you can see bellow:
+* max_len: maximum number of charaters allowed. Default is 1500 so it matchs with ndb [StringProperty limit](https://cloud.google.com/appengine/docs/python/ndb/properties). A value of none indicates no restrictions towards the max size of string.
+* exactly_len: exactly number of characters the string must contain. Default is None indication no restriction.
+* min_len: minumum number of characters the string must contain. Default is None indication no restriction.
+
+## StringField
+
+Field to validate and transform strings. Options:
+* 
