@@ -114,7 +114,7 @@ class BaseField(object):
 
 # Concrete fields
 class StringField(BaseField):
-    def __init__(self, required=False, default=None, repeated=False, choices=None, max_len=500,exactly_len=None,min_len=None):
+    def __init__(self, required=False, default=None, repeated=False, choices=None, max_len=1500,exactly_len=None,min_len=None):
         super(StringField, self).__init__(required, default, repeated, choices)
         self.min_len = min_len
         self.exactly_len = exactly_len

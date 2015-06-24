@@ -9,7 +9,7 @@ It can be installed from pypi:
    pip install gaeforms
 ```
 
-# How t Use
+# How to Use
 
 You can use the project to validate generic forms or those related to NDB Models.
 Let's see the first approach.
@@ -104,7 +104,7 @@ User(age=2, name='Joe')
 These two approchs give you a clean way to validate your data.
 Let's see the already existing Fields on next section:
 
-# Existing 
+# Existing Fields
 
 There are some existing Filds on lib to help on the tedious work of validating standart date.
 All of then come with interesting options:
@@ -115,11 +115,14 @@ All of then come with interesting options:
 * choices: If a list of defined values is provided, values not inside this list are not allowed
 
 Some fields have more interesting values, as you can see bellow:
+
+## StringField
+
+Field to validate and transform strings. It is used in ModelForm if a StringProperty is defined on Model.
+
+Options:
+
 * max_len: maximum number of charaters allowed. Default is 1500 so it matchs with ndb [StringProperty limit](https://cloud.google.com/appengine/docs/python/ndb/properties). A value of none indicates no restrictions towards the max size of string.
 * exactly_len: exactly number of characters the string must contain. Default is None indication no restriction.
 * min_len: minumum number of characters the string must contain. Default is None indication no restriction.
 
-## StringField
-
-Field to validate and transform strings. Options:
-* 
