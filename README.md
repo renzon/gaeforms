@@ -12,14 +12,14 @@ It can be installed from pypi:
 # How t Use
 
 You can use the project to validate generic forms or those related to NDB Models.
-Lets see the first approach.
+Let's see the first approach.
 
-## Form Class
+## Approach 1: Form Class
 
 To validate data you need inherit from Form class. 
 For this class you must create attributes that you want validate and normalize:
 
-```python
+```pyton
 class UserForm(Form):
     name = StringField(required=True)
     age = IntegerField()
@@ -28,9 +28,9 @@ class UserForm(Form):
 After creating the UserForm class you can use it to instantiate objects representing the form.
 You can fill form properties on initialization. Each property can be accessed through its name.
 
-normalize method is used to transform the values received from requests as string into its respective model values.
+**normalize** method is used to transform the values received from requests as string into its respective model values.
  
-validate method is used to validate the values:
+**validate** method is used to validate the values:
 
 
 ```python
@@ -61,3 +61,41 @@ u'5'
 {'age': u'Must be integer', 'name': u'Required field'}
 ```
 
+This can be used to transform and validate any king of data, mainly those not related to a specif Model. 
+In case of existent Model, the second approach bellow can be used
+
+## Approach 2: Model Based Form
+
+Let's say you already have a model class user as bellow:
+```
+class User(Model):
+    name = StringProperty(required=True)
+    age = IntegerProperty()
+```
+
+You could use the user form from approach 1 to validate and normalize data to this model.
+Besides that it would be a boring work rewriting the properties which are already defined on model.
+To avoid this work you can inhiret from ModelForm. 
+You need specify the target model class on attributte **_model_class** as bellow:
+
+```
+class UserForm(ModelForm):
+    _model_class = User
+```
+This way you can use the form to validate and transform data from form into model properties and vice versa:
+
+```python
+>>> from example import UserForm
+>>> form = UserForm(name='Joe', age='2')
+>>> form.normalize()
+{'age': 2, 'name': 'Joe'}
+>>> form.fill_model()
+User(age=2, name='Joe')
+>>> new_form = UserForm(name=None, age='invalid integer')
+>>> new_form.validate()
+{'age': u'Must be integer', 'name': u'Required field'}
+>>> new_form.fill_with_model(user)
+{'age': u'2', 'name': 'Joe'}
+>>> new_form.validate()
+{}
+``
