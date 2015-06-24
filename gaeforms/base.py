@@ -2,12 +2,10 @@
 from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 import datetime
+
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import Model
-
 from webapp2_extras.i18n import gettext as _
-
-from webapp2_extras.i18n import lazy_gettext as _lazy
 from webapp2_extras import i18n
 import pytz
 import re
@@ -474,27 +472,3 @@ class Form(object):
         return {k: _localize(k, v) for k, v in self._fields.iteritems()}
 
 
-class CepField(BaseField):
-    def validate_field(self, value):
-        if value:
-            value = value.replace('-', '')
-            if len(value) != 8:
-                return _('CEP must have exactly 8 characters')
-            try:
-                int(value)
-            except:
-                return _('CEP must contain only numbers')
-        return super(CepField, self).validate_field(value)
-
-    def normalize_field(self, value):
-        if value:
-            return value.replace('-', '')
-        elif value == '':
-            value = None
-        return super(CepField, self).normalize_field(value)
-
-
-    def localize(self, value):
-        if value:
-            return '%s-%s' % (value[:5], value[5:])
-        return super(CepField, self).localize(value)

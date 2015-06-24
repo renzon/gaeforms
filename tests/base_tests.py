@@ -9,7 +9,8 @@ import webapp2
 
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, \
     FloatField, \
-    EmailField, BooleanField, KeyField, CepField
+    EmailField, BooleanField, KeyField
+from gaeforms.country.br import CepField
 
 # workaroung to enable i18n tests
 from util import GAETestCase
