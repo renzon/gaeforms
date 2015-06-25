@@ -126,3 +126,13 @@ Options:
 * exactly_len: exactly number of characters the string must contain. Default is None indication no restriction.
 * min_len: minumum number of characters the string must contain. Default is None indication no restriction.
 
+## EmailField
+
+Field to validate and transform emails. It has the same option as StringField
+
+## KeyField
+
+Field to validate and transform ndb [Keys](https://cloud.google.com/appengine/docs/python/ndb/entities#entity_keys).
+Options: kind indicating the related model class. If present, de default transformation use it and the string as an integer id.
+If not possible or kind is None, it try using **urlsafe** to make the convers
+
