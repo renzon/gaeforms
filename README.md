@@ -138,7 +138,19 @@ If not possible or kind is None, it try using **urlsafe** to make the conversion
 
 ## IntegerField
 
-Field to validate and transforme Integers. It is respective to IntegerProperty from ndb.
+Field to validate and transform Integers. It is respective to IntegerProperty from ndb.
+Options:
+
+* lower: the minimum accepted value for the property. Default is None which does not perform validation.
+* upper: the maximum accepted value for the property. Default is None which does not perform validation
+
+## BooleanField
+
+Field to validate and transform Booleans values. It is respective to BooleanProperty from ndb.
+
+## FloatField
+
+Field to validate and transform Float values. It is respective to FloatProperty from ndb.
 Options:
 
 * lower: the minimum accepted value for the property. Default is None which does not perform validation.
