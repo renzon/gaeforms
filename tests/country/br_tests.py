@@ -10,6 +10,7 @@ import webapp2
 from gaeforms.country.br.field import CepField
 from gaeforms.country.br.property import CepProperty
 from gaeforms.ndb.form import ModelForm
+from gaeforms.ndb.property import BoundaryError
 from util import GAETestCase
 
 app = webapp2.WSGIApplication(
@@ -67,3 +68,6 @@ class CepPropertyTests(GAETestCase):
 
         model = form.fill_model()
         self.assertEqual('12345678', model.cep)
+
+        self.assertRaises(BoundaryError, StubModel, cep='1234567')
+        self.assertRaises(BoundaryError, StubModel, cep='123456789')
