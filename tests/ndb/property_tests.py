@@ -233,10 +233,11 @@ class StringBoundedTests(GAETestCase):
 
         self.assertIsNotNone(form.fill_model())
 
+
 class EmailTests(GAETestCase):
     def test_validate(self):
         class EmailModel(ndb.Model):
-            email=Email()
+            email = Email()
 
-        self.assertRaises(BadEmailError,EmailModel,email='a')
-        self.assertRaises(BadEmailError,EmailModel,email='a@')
+        self.assertRaises(BadEmailError, EmailModel, email='a')
+        self.assertRaises(BadEmailError, EmailModel, email='a@')

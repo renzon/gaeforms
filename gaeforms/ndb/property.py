@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
+import re
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb.model import IntegerProperty, _MAX_STRING_LENGTH
 
@@ -15,7 +16,9 @@ class BadEmailError(Exception):
 
 # this class is used only to distinguish from StringProperty
 class Email(ndb.StringProperty):
-    pass
+    def _validate(self, value):
+        if value and not re.match(r'[^@]+@[^@]+\.[^@]+', value):
+            raise BadEmailError('Bad formart email "%s"' % value)
 
 
 class StringBounded(ndb.StringProperty):
@@ -32,7 +35,6 @@ class StringBounded(ndb.StringProperty):
             raise BoundaryError('%s should have equal or more then %s characters' % (value, self.min_len))
         if self.exactly_len is not None and len(value) != self.exactly_len:
             raise BoundaryError('%s should have exactly %s characters' % (value, self.exactly_len))
-
 
 
 class IntegerBounded(ndb.IntegerProperty):
