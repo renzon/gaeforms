@@ -192,7 +192,16 @@ When used, the form will validate the field as an email, using EmailField.
 
 ## IntegerBounded
 
-This property can be used as substitute of Integer property. It differ from the original one by the following extra options:
+This property can be used as substitute of IntegerProperty. It differs from the original one by the following extra options:
 
 * upper: indicate the maximum allowed value.
 * lower: indicate the minimum allowed value.
+
+## FloatBounded
+
+This property can be used as substitute of FloatProperty. It differs from the original one by the following extra options:
+
+* upper: indicate the maximum allowed value.
+* lower: indicate the minimum allowed value.
+
+
