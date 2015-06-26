@@ -185,6 +185,14 @@ Somo default ndb properties does have the same option as fields.
 As a example, the IntegerProperty does not have a **lower** nor **upper** options.
 Because of this lack of functionalities, the following properties were created on package property:
 
+## StringBounded
+
+This property can be used as substitute of StringProperty. It differs from the original one by the following extra options:
+
+* exactly_len: indicate the exactly length the property must have. Default is None indication no validation.
+* min_len: indicate the minimun length the property must have. Default is None indication no validation.
+* max_len: indicate the maximum length the property must have. Default is the maximum len allowed on db, currently 1500 indication no validation. None indicates no validation. Usefull when using indexex=False.
+
 ## Email
 
 This property is used to distinguish from ordinary String property.
