@@ -1,4 +1,4 @@
-gaeforms
+GaeForms
 ============
 
 Project to automate form validation and normalization on Google App Engine in a Django Forms fashion.
