@@ -442,5 +442,44 @@ Address(cep=u'12345678')
 {'cep': u'CEP must contain only numbers'}
 >>> form.localize(cep='12345678')
 {'cep': u'12345-678'}
+``
+
+# Validating compound fields
+
+Sometimes the validation is not related with only one field, there can be dependency between different fields.
+To perform this kind of validation you can override validate method from Form or ModelForm.
+As an example, let's say our previous Address has a boolean field indicating if cep must be present or not.
+We could change the classes as follows:
+
+```python
+class Address(Model):
+    cep_declared = BooleanProperty(default=False)
+    cep = CepProperty()
+
+
+class AddressForm(ModelForm):
+    _model_class = Address
+
+    def validate(self):
+        errors = super(AddressForm, self).validate()
+        normalized_dct = self.normalize()
+        if normalized_dct['cep_declared'] == True and not self.cep:
+            errors['cep'] = 'If CEP is declared it should not be empty'
+        return errors
 ```
 
+Once the form is changed it can handle the custom validation:
+
+```python
+>>> form = AddressForm(cep_declared=False, cep='')
+>>> form.validate()
+{}
+>>> form.cep_declared = True
+>>> form.validate()
+{u'cep': u'If CEP is declared it should not be empty'}
+>>> form.cep_declared = False
+>>> form.fill_model()
+Address(cep=None, cep_declared=False)
+```
+
+# Internationalization (i18n)

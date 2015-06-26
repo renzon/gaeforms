@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from google.appengine.ext.ndb.model import Model, IntegerProperty, StringProperty
+from google.appengine.ext.ndb.model import Model, IntegerProperty, StringProperty, BooleanProperty
 from gaeforms.country.br.property import CepProperty
 from gaeforms.ndb.form import ModelForm
 import os
@@ -40,8 +40,16 @@ class UserForm(ModelForm):
 
 
 class Address(Model):
-    cep = CepProperty(required=True)
+    cep_declared = BooleanProperty(default=False)
+    cep = CepProperty()
 
 
 class AddressForm(ModelForm):
     _model_class = Address
+
+    def validate(self):
+        errors = super(AddressForm, self).validate()
+        normalized_dct = self.normalize()
+        if normalized_dct['cep_declared'] == True and not self.cep:
+            errors['cep'] = 'If CEP is declared it should not be empty'
+        return errors
