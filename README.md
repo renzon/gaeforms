@@ -442,7 +442,7 @@ Address(cep=u'12345678')
 {'cep': u'CEP must contain only numbers'}
 >>> form.localize(cep='12345678')
 {'cep': u'12345-678'}
-``
+```
 
 # Validating compound fields
 
@@ -481,5 +481,3 @@ Once the form is changed it can handle the custom validation:
 >>> form.fill_model()
 Address(cep=None, cep_declared=False)
 ```
-
-# Internationalization (i18n)
