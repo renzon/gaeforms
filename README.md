@@ -481,3 +481,5 @@ Once the form is changed it can handle the custom validation:
 >>> form.fill_model()
 Address(cep=None, cep_declared=False)
 ```
+
+So now you can validate your data on Google App Engine like a boss ;)
