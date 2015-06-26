@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 from google.appengine.ext.ndb.model import Model, IntegerProperty, StringProperty
+from gaeforms.country.br.property import CepProperty
 from gaeforms.ndb.form import ModelForm
 import os
 import sys
@@ -36,3 +37,11 @@ class User(Model):
 
 class UserForm(ModelForm):
     _model_class = User
+
+
+class Address(Model):
+    cep = CepProperty(required=True)
+
+
+class AddressForm(ModelForm):
+    _model_class = Address

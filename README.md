@@ -371,3 +371,76 @@ The steps here are enough to create a new field. But let's see how to link the f
 
 # Linking Fields with Database Properties
 
+The existing default ndb properties are very simple covering only some kind of validations.
+But the framework allow Property extensions and it can be combined with Fields from gae forms.
+The subsection bellow show hos to do it.
+
+## Step 1: Extending a Property
+
+The ndb ORM, initially written by Guido Van Rossum, allow Property extension as described in its [documentation](https://cloud.google.com/appengine/docs/python/ndb/subclassprop).
+So the class CepProperty is created to represent a Brazilian postal code with its validation.
+It must inherits from the target database class, StringProperty in this case.
+The **_validate** method is overriden accordingly to CEP rules:
+
+```python
+class CepProperty(StringProperty):
+    """
+    Class related with Brazilian postal code (CEP)
+    """
+    def _validate(self, value):
+        if len(value) != 8:
+            raise BoundaryError('%s should have exactly 8 characters' % value)
+```
+
+The validation is done on property again so people using only the property, and not the form validation, can still have their data consistent.
+
+## Step 2: Connecting Property with a Field
+
+Once we have CepProperty and CepField, it is desirable that models containing the properties can use the field and performing a form validation.
+So the function registry is used as bellow:
+
+```python
+from gaeforms.country.br.field import CepField
+from gaeforms.ndb.form import registry
+
+
+class CepProperty(StringProperty):
+    """
+    Class related with Brazilian postal code (CEP)
+    """
+
+    def _validate(self, value):
+        if len(value) != 8:
+            raise BoundaryError('%s should have exactly 8 characters' % value)
+
+
+registry(CepProperty, CepField)
+```
+
+Once this is done, you can use your custom property to build models and form:
+
+```python
+class Address(Model):
+    cep = CepProperty(required=True)
+
+
+class AddressForm(ModelForm):
+    _model_class = Address
+```
+
+After model creation, you can use it to perform data validation and normalization:
+
+```python
+>>> form = AddressForm(cep='12345-678')
+>>> form.fill_model()
+Address(cep=u'12345678')
+>>> form.cep = '123456789'
+>>> form.validate()
+{'cep': u'CEP must have exactly 8 characters'}
+>>> form.cep = '1234567a'
+>>> form.validate()
+{'cep': u'CEP must contain only numbers'}
+>>> form.localize(cep='12345678')
+{'cep': u'12345-678'}
+```
+
