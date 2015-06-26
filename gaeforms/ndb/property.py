@@ -9,6 +9,10 @@ class BoundaryError(Exception):
     pass
 
 
+class BadEmailError(Exception):
+    pass
+
+
 # this class is used only to distinguish from StringProperty
 class Email(ndb.StringProperty):
     pass

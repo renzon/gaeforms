@@ -7,7 +7,7 @@ from google.appengine.ext import ndb
 from gaeforms.ndb.form import ModelForm
 
 from gaeforms.ndb.property import IntegerBounded, BoundaryError, SimpleDecimal, SimpleCurrency, FloatBounded, \
-    StringBounded
+    StringBounded, Email, BadEmailError
 from util import GAETestCase
 
 
@@ -232,3 +232,11 @@ class StringBoundedTests(GAETestCase):
         form.max_min = '12'
 
         self.assertIsNotNone(form.fill_model())
+
+class EmailTests(GAETestCase):
+    def test_validate(self):
+        class EmailModel(ndb.Model):
+            email=Email()
+
+        self.assertRaises(BadEmailError,EmailModel,email='a')
+        self.assertRaises(BadEmailError,EmailModel,email='a@')
