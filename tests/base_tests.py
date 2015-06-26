@@ -12,17 +12,8 @@ from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringFie
     EmailField, BooleanField, KeyField
 
 
-# workaroung to enable i18n tests
 from util import GAETestCase
 
-app = webapp2.WSGIApplication(
-    [webapp2.Route('/', None, name='upload_handler')])
-
-request = webapp2.Request({'SERVER_NAME': 'test', 'SERVER_PORT': 80,
-                           'wsgi.url_scheme': 'http'})
-request.app = app
-app.set_globals(app=app, request=request)
-# end fo workaround
 
 
 def error_msg(attr_name):

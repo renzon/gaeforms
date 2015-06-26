@@ -4,8 +4,10 @@ from decimal import Decimal, InvalidOperation
 import unittest
 
 from google.appengine.ext import ndb
+from gaeforms.ndb.form import ModelForm
 
-from gaeforms.ndb.property import IntegerBounded, BoundaryError, SimpleDecimal, SimpleCurrency, FloatBounded
+from gaeforms.ndb.property import IntegerBounded, BoundaryError, SimpleDecimal, SimpleCurrency, FloatBounded, \
+    StringBounded
 from util import GAETestCase
 
 
@@ -159,3 +161,74 @@ class SimpleCurrencyTests(GAETestCase):
 
         self.assertRaises(BoundaryError, ModelMock, currency='-0.01')
         ModelMock(currency='0').put()
+
+
+class StringBoundedModel(ndb.Model):
+    exactly = StringBounded(exactly_len=2)
+    min = StringBounded(min_len=2)
+    max = StringBounded(max_len=10)
+    max_min = StringBounded(min_len=2, max_len=10)
+
+
+class StringBoundedTests(GAETestCase):
+    def test_exactly_value(self):
+        self.assertRaises(BoundaryError, StringBoundedModel, exactly='1')
+        self.assertRaises(BoundaryError, StringBoundedModel, exactly='123')
+        model_key = StringBoundedModel(exactly='12').put()
+        self.assertIsNotNone(model_key)
+
+    def test_min_len_value(self):
+        self.assertRaises(BoundaryError, StringBoundedModel, min='')
+        self.assertRaises(BoundaryError, StringBoundedModel, min='1')
+        model_key = StringBoundedModel(min='12').put()
+        self.assertIsNotNone(model_key)
+
+        model_key = StringBoundedModel(min='12345678901234567890').put()
+        self.assertIsNotNone(model_key)
+
+    def test_max_len_value(self):
+        self.assertRaises(BoundaryError, StringBoundedModel, max='12345678901')
+        self.assertRaises(BoundaryError, StringBoundedModel, max='123456789012')
+        model_key = StringBoundedModel(max='1234567890').put()
+        self.assertIsNotNone(model_key)
+
+        model_key = StringBoundedModel(max='123456789').put()
+        self.assertIsNotNone(model_key)
+
+    def test_max_min_len_value(self):
+        self.assertRaises(BoundaryError, StringBoundedModel, max_min='')
+        self.assertRaises(BoundaryError, StringBoundedModel, max_min='1')
+        self.assertRaises(BoundaryError, StringBoundedModel, max_min='12345678901')
+        self.assertRaises(BoundaryError, StringBoundedModel, max_min='123456789012')
+        model_key = StringBoundedModel(max_min='1234567890').put()
+        self.assertIsNotNone(model_key)
+
+        model_key = StringBoundedModel(max_min='123456789').put()
+        self.assertIsNotNone(model_key)
+
+        model_key = StringBoundedModel(max_min='12').put()
+        self.assertIsNotNone(model_key)
+
+        model_key = StringBoundedModel(max_min='123').put()
+        self.assertIsNotNone(model_key)
+
+    def test_form_linking_with_string_field(self):
+        class StringBoundedForm(ModelForm):
+            _model_class = StringBoundedModel
+
+        form = StringBoundedForm(exactly='1', max='12345678901', min='', max_min='1')
+
+        errors = form.validate()
+        self.assertEqual(errors['exactly'], 'Has 1 characters and it must have exactly 2')
+        self.assertEqual(errors['max'], 'Has 11 characters and it must have 10 or less')
+        self.assertEqual(errors['min'], 'Has 0 characters and it must have 2 or more')
+        self.assertEqual(errors['max_min'], 'Has 1 characters and it must have 2 or more')
+
+        self.assertRaises(BoundaryError, form.fill_model)
+
+        form.exactly = '12'
+        form.max = ''
+        form.min = '12'
+        form.max_min = '12'
+
+        self.assertIsNotNone(form.fill_model())

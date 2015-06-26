@@ -4,7 +4,7 @@ from google.appengine.ext.ndb.model import IntegerProperty, StringProperty, Date
     FloatProperty, TextProperty, BooleanProperty, KeyProperty
 from gaeforms.base import IntegerField, Form, _FormMetaclass, DecimalField, StringField, DateField, DateTimeField, \
     FloatField, EmailField, BooleanField, KeyField
-from gaeforms.ndb.property import IntegerBounded, SimpleDecimal, SimpleCurrency, FloatBounded, Email
+from gaeforms.ndb.property import IntegerBounded, SimpleDecimal, SimpleCurrency, FloatBounded, Email, StringBounded
 
 _property_to_field_dct = {}
 
@@ -26,6 +26,7 @@ registry(FloatBounded, FloatField)
 registry(Email, EmailField)
 registry(BooleanProperty, BooleanField)
 registry(KeyProperty, KeyField)
+registry(StringBounded,StringField)
 
 
 class NotRegisteredProperty(Exception):

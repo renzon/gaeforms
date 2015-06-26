@@ -2,16 +2,34 @@
 from __future__ import absolute_import, unicode_literals
 from decimal import Decimal
 from google.appengine.ext import ndb
-from google.appengine.ext.ndb.model import IntegerProperty
+from google.appengine.ext.ndb.model import IntegerProperty, _MAX_STRING_LENGTH
 
 
 class BoundaryError(Exception):
     pass
 
 
-#this class is used only to distinguish from StringProperty
+# this class is used only to distinguish from StringProperty
 class Email(ndb.StringProperty):
     pass
+
+
+class StringBounded(ndb.StringProperty):
+    def __init__(self, name=None, compressed=False, max_len=_MAX_STRING_LENGTH, exactly_len=None, min_len=None, **kwds):
+        super(StringBounded, self).__init__(name=name, compressed=compressed, **kwds)
+        self.max_len = max_len
+        self.exactly_len = exactly_len
+        self.min_len = min_len
+
+    def _validate(self, value):
+        if self.max_len is not None and len(value) > self.max_len:
+            raise BoundaryError('%s should have equal or less then %s characters' % (value, self.max_len))
+        if self.min_len is not None and len(value) < self.min_len:
+            raise BoundaryError('%s should have equal or more then %s characters' % (value, self.min_len))
+        if self.exactly_len is not None and len(value) != self.exactly_len:
+            raise BoundaryError('%s should have exactly %s characters' % (value, self.exactly_len))
+
+
 
 class IntegerBounded(ndb.IntegerProperty):
     '''

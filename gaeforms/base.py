@@ -122,7 +122,11 @@ class StringField(BaseField):
 
     def set_options(self, model_property):
         super(StringField, self).set_options(model_property)
-        self.max_len = 500 if model_property._indexed else None
+        self.max_len = getattr(model_property, 'max_len', None)
+        if self.max_len is None:
+            self.max_len = 500 if model_property._indexed else None
+        self.exactly_len = getattr(model_property, 'exactly_len', None)
+        self.min_len = getattr(model_property, 'min_len', None)
 
 
     def validate_field(self, value):
