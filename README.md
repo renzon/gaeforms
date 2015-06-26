@@ -204,4 +204,21 @@ This property can be used as substitute of FloatProperty. It differs from the or
 * upper: indicate the maximum allowed value.
 * lower: indicate the minimum allowed value.
 
+## SimpleDecimal
+
+Property used to describe decimal values with precise decimal places.
+On model the attribute is a Decimal instance. 
+On database it is stored as a integer disregarding the dot, e.g, 1.00 is stored as 100.
+Options
+
+* upper: indicate the maximum allowed value.
+* lower: indicate the minimum allowed value.
+* decimal_places: indicate the precision of decimal. Default is 2.
+
+## SimpleCurrency
+
+Property used to define currency values. It inherits from SimpleDecimal.
+The only difference is that **lower** default value is 0 instead of None, e.g. it does not allow negativa values.
+
+
 
