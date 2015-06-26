@@ -8,6 +8,7 @@ from google.appengine.ext import ndb
 from google.appengine.ext.ndb.polymodel import PolyModel
 import webapp2
 from webapp2_extras import i18n
+from gaeforms import base
 
 from gaeforms.ndb.form import ModelForm, InvalidParams, ModelFormSecurityError
 from gaeforms.ndb.property import IntegerBounded, SimpleCurrency, SimpleDecimal, FloatBounded, Email
@@ -103,9 +104,9 @@ class ModelFormTests(GAETestCase):
         form = ModelFormMock(integer='0',
                              decimal='0.0001',
                              currency='-0.01',
-                             str='a' * 501,
-                             str_not_indexed='a' * 501,
-                             txt='a' * 501,
+                             str='a' * (base._MAX_STRING_LENGTH+1),
+                             str_not_indexed='a' * (base._MAX_STRING_LENGTH+1),
+                             txt='a' * (base._MAX_STRING_LENGTH+1),
                              email='foo@bar',
                              datetime='a/09/30 23:56:56',
                              date='1999/08/a1')

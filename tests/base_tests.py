@@ -6,6 +6,7 @@ import datetime
 
 from google.appengine.ext.ndb import Model, Key
 import webapp2
+from gaeforms import base
 
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, \
     FloatField, \
@@ -447,7 +448,7 @@ class StringFieldTests(unittest.TestCase):
     def test_str_with_more_than_500_chars(self):
         field = StringField()
         field._set_attr_name('n')
-        self.assertEqual('Has 501 characters and it must have 500 or less', field.validate_field('a' * 501))
+        self.assertEqual('Has 1501 characters and it must have 1500 or less', field.validate_field('a' * (base._MAX_STRING_LENGTH+1)))
 
     def test_str_with_more_than_500_chars_but_with_no_max(self):
         field = StringField(max_len=None)
