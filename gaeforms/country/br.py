@@ -7,7 +7,7 @@ from gaeforms.base import BaseField
 class CepField(BaseField):
     def validate_field(self, value):
         if value:
-            value = value.replace('-', '')
+            value = self.normalize_field(value)
             if len(value) != 8:
                 return _('CEP must have exactly 8 characters')
             try:
@@ -24,7 +24,7 @@ class CepField(BaseField):
         return super(CepField, self).normalize_field(value)
 
 
-    def localize(self, value):
+    def localize_field(self, value):
         if value:
             return '%s-%s' % (value[:5], value[5:])
-        return super(CepField, self).localize(value)
+        return super(CepField, self).localize_field(value)

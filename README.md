@@ -218,7 +218,148 @@ Options
 ## SimpleCurrency
 
 Property used to define currency values. It inherits from SimpleDecimal.
-The only difference is that **lower** default value is 0 instead of None, e.g. it does not allow negativa values.
+The only difference is that **lower** default value is 0 instead of None, e.g. it does not allow negative values.
+
+#Extending Fields - Implementing a field for Brazilian postal code
+
+With these properties and fields it is possible enhance your system validation. 
+Besides that there are cases in which you would like create your own custom fields.
+Let's see how to do it!
+
+## Step 1 - Unit Tests
+
+To show you how extend a Field let's implement a example.
+We are going to build a field to validate Brazilian postal code.
+It's content is formed by exactly eight numbers. 
+There can be a hyphen on fifth position.
+Bellow you can see the unit tests for it:
+
+```python
+class CepFieldTests(unittest.TestCase):
+    def test_normalization(self):
+        field = CepField()
+        self.assertIsNone(field.normalize(''))
+        self.assertIsNone(field.normalize(None))
+        self.assertEqual('12345678', field.normalize('12345-678'))
+        self.assertEqual('12345678', field.normalize('12345678'))
+
+    def test_localization(self):
+        field = CepField()
+        self.assertEqual('', field.localize(''))
+        self.assertEqual('', field.localize(None))
+        self.assertEqual('12345-678', field.localize('12345678'))
+
+    def test_validate(self):
+        field = CepField()
+        field._set_attr_name('d')
+        self.assertIsNone(field.validate('12345678'))
+        self.assertIsNone(field.validate('12345-678'))
+        self.assertIsNone(field.validate('1234567-8'))
+        self.assertEqual('CEP must have exactly 8 characters', field.validate('1234567'))
+        self.assertEqual('CEP must have exactly 8 characters', field.validate('123456789'))
+        self.assertEqual('CEP must contain only numbers', field.validate('1234567a'))
+```
+
+## Step 2 - Inheriting from a BaseField or another Existing Field
+
+Your custom field must inherit from BaseField or another Field class as bellow:
+
+```python
+from webapp2_extras.i18n import gettext as _
 
 
+class CepField(BaseField):
+    def valiate_field(self, value):
+        if value:
+            value = self.normalize_field(value)
+            if len(value) != 8:
+                return _('CEP must have exactly 8 characters')
+            try:
+                int(value)
+            except:
+                return _('CEP must contain only numbers')
+        return super(CepField, self).validate_field(value)
+
+    def normalize_field(self, value):
+        if value:
+            return value.replace('-', '')
+        elif value == '':
+            value = None
+        return super(CepField, self).normalize_field(value)
+
+
+    def localize_field(self, value):
+        if value:
+            return '%s-%s' % (value[:5], value[5:])
+        return super(CepField, self).localize_field(value)
+```
+
+There are three important methods which must be overridden and we are going to see them on next subsections.
+
+## Step 3: Override **normalize_field**
+
+To implement the field we need to override **normalize_field**. 
+This method receive a string, the commom format from a web request, and must transform in a respective database value.
+We want to save a string with only its characaters, e.g, without hyphen.
+So the overriden method is bellow:
+
+```python
+    def normalize_field(self, value):
+        if value:
+            return value.replace('-', '')
+        elif value == '':
+            value = None
+        return super(CepField, self).normalize_field(value)
+```
+
+Note that on last the method from super class is executed, so it can handle some other commom cases of normalization.
+One example is using default value if it is provided.
+
+## Step 4: Override **localize_field**
+
+Another method that need be overridde is **localize_field**. 
+It receives need receive a value from db and transform it in a string. 
+It does the exactly opposite of **normalize_field**.
+This value is commonly presented to final user and must be formatted accordingly.
+So the hyphen was inserted on sixth position:
+
+```python
+def localize_field(self, value):
+        if value:
+            return '%s-%s' % (value[:5], value[5:])
+        return super(CepField, self).localize_field(value)
+```
+
+Note that on last line the parent **localize_field** method was called.
+This way the method can handle another commom cases, e.g,, transforming None value on empty string.
+
+## Step 5: Override **validate_field**
+
+Another method that need be overridde is **validate_field**. 
+It receives a string value and must perform validation.
+A string containing the error message must be returned if there is error.
+So this was the result:
+
+```python
+    def valiate_field(self, value):
+        if value:
+            value = self.normalize_field(value)
+            if len(value) != 8:
+                return _('CEP must have exactly 8 characters')
+            try:
+                int(value)
+            except:
+                return _('CEP must contain only numbers')
+        return super(CepField, self).validate_field(value)
+```
+
+As on previous methods, the last line execute the respective parent method.
+This way the field validate some other common cases such as not allowing empty string if the field is required.
+ 
+Another important thing is realize that the internationalization function is been used to return the message.
+Thus the error messages can be translated to another languages, as we are going to see on Internationalization section.
+
+The steps here are enough to create a new field. But let's see how to link the field to a database value.
+
+# Linking Fields with Database Properties
 
