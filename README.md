@@ -156,3 +156,34 @@ Options:
 * lower: the minimum accepted value for the property. Default is None which does not perform validation.
 * upper: the maximum accepted value for the property. Default is None which does not perform validation
 
+## DecimalField
+
+Field to validate and transform Decimal values. 
+It saves the number as a Integer in database, considering the number of decimal places.
+On model the attributte is a instance of Decimal class.
+It is respective to SimpleDecimal and SimpleCurrency, both extended properties from  property package which will be explained.
+Options:
+
+* lower: the minimum accepted value for the property. Default is None which does not perform validation.
+* upper: the maximum accepted value for the property. Default is None which does not perform validation
+
+## DateField
+
+Field to validate and transform date values. In en_US it transforms the string of type dd/mm/yyyy.
+
+## DateTimeField
+
+Field to validate and transform datetime values. In en_US it transforms the string of type dd/mm/yyyy HH:MM:SS.
+
+Those are the common fields. But once some ndb Properties can be extended, some new are created as you can see on next section.
+
+# Extended ndb Properties
+
+Somo default ndb properties does have the same option as fields. 
+As a example, the IntegerProperty does not have a **lower** nor **upper** options.
+Because of this lack of functionalities, the following properties were created on package property:
+
+## Email
+
+This property is used to distinguish from ordinary String property.
+When used, the form will validate the field as an email, using EmailField.

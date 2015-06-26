@@ -303,8 +303,8 @@ class FloatField(BaseField):
 
 
 class DecimalField(BaseField):
-    def _to_decimal(self, upper):
-        return None if upper is None else self.normalize_field(unicode(upper))
+    def _to_decimal(self, number):
+        return None if number is None else self.normalize_field(unicode(number))
 
     def __init__(self, required=False, default=None, repeated=False, choices=None, decimal_places=2, lower=None,
                  upper=None):
