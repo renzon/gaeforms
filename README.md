@@ -165,7 +165,8 @@ It is respective to SimpleDecimal and SimpleCurrency, both extended properties f
 Options:
 
 * lower: the minimum accepted value for the property. Default is None which does not perform validation.
-* upper: the maximum accepted value for the property. Default is None which does not perform validation
+* upper: the maximum accepted value for the property. Default is None which does not perform validation.
+* decimal_places: indicate the number of decimal places on property. Default is 2.
 
 ## DateField
 
@@ -177,6 +178,7 @@ Field to validate and transform datetime values. In en_US it transforms the stri
 
 Those are the common fields. But once some ndb Properties can be extended, some new are created as you can see on next section.
 
+
 # Extended ndb Properties
 
 Somo default ndb properties does have the same option as fields. 
@@ -187,3 +189,10 @@ Because of this lack of functionalities, the following properties were created o
 
 This property is used to distinguish from ordinary String property.
 When used, the form will validate the field as an email, using EmailField.
+
+## IntegerBounded
+
+This property can be used as substitute of Integer property. It differ from the original one by the following extra options:
+
+* upper: indicate the maximum allowed value.
+* lower: indicate the minimum allowed value.
