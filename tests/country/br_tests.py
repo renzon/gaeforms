@@ -7,8 +7,8 @@ import webapp2
 
 
 # workaroung to enable i18n tests
-from gaeforms.country.br.field import CepField
-from gaeforms.country.br.property import CepProperty
+from gaeforms.country.br.field import CepField, CpfField
+from gaeforms.country.br.property import CepProperty, CpfProperty
 from gaeforms.ndb.form import ModelForm
 from gaeforms.ndb.property import BoundaryError
 from util import GAETestCase
@@ -71,3 +71,48 @@ class CepPropertyTests(GAETestCase):
 
         self.assertRaises(BoundaryError, StubModel, cep='1234567')
         self.assertRaises(BoundaryError, StubModel, cep='123456789')
+
+
+class CpfFieldTests(unittest.TestCase):
+    def test_normalization(self):
+        field = CpfField()
+        self.assertIsNone(field.normalize(''))
+        self.assertIsNone(field.normalize(None))
+        self.assertEquals('06768725815', field.normalize('067.687.258-15'))
+        self.assertEquals('13731760592', field.normalize('13731760592'))
+
+    def test_localization(self):
+        field = CpfField()
+        self.assertEqual('', field.localize(''))
+        self.assertEqual('', field.localize(None))
+        self.assertEquals('067.687.258-15', field.localize('06768725815'))
+
+    def test_validate(self):
+        field = CpfField()
+        self.assertIsNone(field.validate('06768725815'))
+        self.assertIsNone(field.validate('067.687.258-15'))
+        self.assertIsNone(field.validate('067-687-258.15'))
+        self.assertEqual('CPF must have exactly 11 characters', field.validate('0676872581'))
+        self.assertEqual('CPF must have exactly 11 characters', field.validate('067687258155'))
+        self.assertEqual('Invalid CPF', field.validate('067.687.258-00'))
+
+
+class CpfPropertyTests(GAETestCase):
+    def test_property_to_field_link(self):
+        class StubModel(Model):
+            cpf = CpfProperty(required=True)
+
+        class StubForm(ModelForm):
+            _model_class = StubModel
+
+        form = StubForm(cpf='')
+        self.assertDictEqual({'cpf': u'Required field'}, form.validate())
+
+        form.cpf = '912.890.377-36'
+        self.assertDictEqual({}, form.validate())
+
+        model = form.fill_model()
+        self.assertEqual('91289037736', model.cpf)
+
+        self.assertRaises(BoundaryError, StubModel, cpf='9128903773')
+        self.assertRaises(BoundaryError, StubModel, cpf='912890377361')
