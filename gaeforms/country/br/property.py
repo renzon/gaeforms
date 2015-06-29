@@ -2,7 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 from google.appengine.ext.ndb.model import StringProperty
 from gaeforms.ndb.property import BoundaryError
-from gaeforms.country.br.field import CepField, CpfField
+from gaeforms.country.br.field import CepField, CpfField, CnpjField
 from gaeforms.ndb.form import registry
 
 
@@ -30,3 +30,14 @@ class CpfProperty(StringProperty):
 
 
 registry(CpfProperty, CpfField)
+
+
+class CnpjProperty(StringProperty):
+    """
+    """
+
+    def _validate(self, value):
+        pass
+
+
+registry(CnpjProperty, CnpjField)

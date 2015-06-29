@@ -74,3 +74,35 @@ class CpfField(BaseField):
         dv1 = mod11(value)
         dv2 = mod11('%s%s' % (value, dv1))
         return str(dv1) + str(dv2)
+
+
+class CnpjField(BaseField):
+
+    def validate_field(self, number):
+        number = number.replace('-', '').replace('.', '').replace('/', '')
+
+        if len(number) != 14:
+            return _('CNPJ must have exactly 14 characters')
+
+        first_weights = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+        second_weights = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+        first_part = number[:12]
+
+        first_digit = number[12]
+        second_digit = number[13]
+
+        if (first_digit == self.__check_digit(first_part, first_weights) and
+           second_digit == self.__check_digit(number[:13], second_weights)):
+            return None
+
+        return _('Invalid CNPJ')
+
+    def __check_digit(self, number, weights):
+        total = 0
+        for i in xrange(0, len(weights)):
+            total += int(number[i]) * weights[i]
+
+        rest_division = total % 11
+        if rest_division < 2:
+            return '0'
+        return str(11 - rest_division)

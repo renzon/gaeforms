@@ -6,8 +6,8 @@ from google.appengine.ext.ndb import Model
 import webapp2
 
 
-# workaroung to enable i18n tests
-from gaeforms.country.br.field import CepField, CpfField
+# workaround to enable i18n tests
+from gaeforms.country.br.field import CepField, CpfField, CnpjField
 from gaeforms.country.br.property import CepProperty, CpfProperty
 from gaeforms.ndb.form import ModelForm
 from gaeforms.ndb.property import BoundaryError
@@ -116,3 +116,13 @@ class CpfPropertyTests(GAETestCase):
 
         self.assertRaises(BoundaryError, StubModel, cpf='9128903773')
         self.assertRaises(BoundaryError, StubModel, cpf='912890377361')
+
+
+class CnpjFieldTests(unittest.TestCase):
+
+    def test_cnpj_validation(self):
+        cnpj_field = CnpjField()
+        self.assertIsNone(cnpj_field.validate_field('69.435.154/0001-02'))
+        self.assertIsNone(cnpj_field.validate_field('53.612.734/0001-98'))
+        self.assertEquals('Invalid CNPJ', cnpj_field.validate_field('12312313212342'))
+        self.assertEquals('CNPJ must have exactly 14 characters', cnpj_field.validate_field('6188261300019'))
