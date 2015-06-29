@@ -178,6 +178,13 @@ Field to validate and transform datetime values. In en_US it transforms the stri
 
 Those are the common fields. But once some ndb Properties can be extended, some new are created as you can see on next section.
 
+## CepField
+
+Field to validate and transform Brazilian postal codes. It transforms the string of type 12345-678 to 12345678
+
+## CpfField
+
+Field to validate and transform Brazilian personal document identifier. It transforms the string of type 067.687.258-15 to 06768725815 and validates the check digits.
 
 # Extended ndb Properties
 
@@ -227,6 +234,14 @@ Options
 
 Property used to define currency values. It inherits from SimpleDecimal.
 The only difference is that **lower** default value is 0 instead of None, e.g. it does not allow negative values.
+
+## Cep
+
+Property used to define Brazilian postal code. It inherits from String. It inherits from String and validate the field as an Cep using CepField.
+
+## Cpf
+
+Property used to define Brazilian personal document identifier. It inherits from String and validate the field as an Cpf using CpfField.
 
 #Extending Fields - Implementing a field for Brazilian postal code
 

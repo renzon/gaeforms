@@ -1,7 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+import operator
 from webapp2_extras.i18n import gettext as _
 from gaeforms.base import BaseField
+
+
+def mod11(value):
+    numbers = [int(x) for x in value]
+    range_max = len(numbers) + 1
+    result = sum(map(operator.mul, numbers, range(range_max, 1, -1)))
+    result = 11 - (result % 11)
+    if result >= 10:
+        result = 0
+    return result
 
 
 class CepField(BaseField):
@@ -28,3 +39,38 @@ class CepField(BaseField):
         if value:
             return '%s-%s' % (value[:5], value[5:])
         return super(CepField, self).localize_field(value)
+
+
+class CpfField(BaseField):
+    def validate_field(self, value):
+        if value:
+            value = self.normalize_field(value)
+            if len(value) != 11:
+                return _('CPF must have exactly 11 characters')
+            try:
+                int(value)
+            except:
+                return _('CPF must contain only numbers')
+            user_dv = value[-2:]
+            real_dv = self._calculate_dv(value[:9])
+            if user_dv != real_dv:
+                return _('Invalid CPF')
+
+        return super(CpfField, self).validate_field(value)
+
+    def normalize_field(self, value):
+        if value:
+            return value.replace('-', '').replace('.', '')
+        elif value == '':
+            value = None
+        return super(CpfField, self).normalize_field(value)
+
+    def localize_field(self, value):
+        if value:
+            return '%s.%s.%s-%s' % (value[:3], value[3:6], value[6:9], value[9:11])
+        return super(CpfField, self).localize_field(value)
+
+    def _calculate_dv(self, value):
+        dv1 = mod11(value)
+        dv2 = mod11('%s%s' % (value, dv1))
+        return str(dv1) + str(dv2)
