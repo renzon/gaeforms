@@ -16,7 +16,7 @@ Let's see the first approach.
 
 ## Approach 1: Form Class
 
-To validate data you need inherit from Form class. 
+To validate data you need inherit from Form class.
 For this class you must create attributes that you want validate and normalize:
 
 ```pyton
@@ -29,7 +29,7 @@ After creating the UserForm class you can use it to instantiate objects represen
 You can fill form properties on initialization. Each property can be accessed through its name.
 
 **normalize** method is used to transform the values received from requests as string into its respective model values.
- 
+
 **validate** method is used to validate the values:
 
 
@@ -61,7 +61,7 @@ u'5'
 {'age': u'Must be integer', 'name': u'Required field'}
 ```
 
-This can be used to transform and validate any king of data, mainly those not related to a specif Model. 
+This can be used to transform and validate any king of data, mainly those not related to a specif Model.
 In case of existent Model, the second approach bellow can be used
 
 ## Approach 2: Model Based Form
@@ -76,7 +76,7 @@ class User(Model):
 
 You could use the **UserForm** from approach 1 to validate and normalize data to this model.
 Besides that it would be a boring work rewriting the properties which are already defined on model.
-To avoid this work you can inhiret from ModelForm. 
+To avoid this work you can inhiret from ModelForm.
 You need specify the target model class on attributte **_model_class** as bello:
 
 ```python
@@ -158,7 +158,7 @@ Options:
 
 ## DecimalField
 
-Field to validate and transform Decimal values. 
+Field to validate and transform Decimal values.
 It saves the number as a Integer in database, considering the number of decimal places.
 On model the attributte is a instance of Decimal class.
 It is respective to SimpleDecimal and SimpleCurrency, both extended properties from  property package which will be explained.
@@ -188,7 +188,7 @@ Field to validate and transform Brazilian personal document identifier. It trans
 
 # Extended ndb Properties
 
-Somo default ndb properties does have the same option as fields. 
+Somo default ndb properties does have the same option as fields.
 As a example, the IntegerProperty does not have a **lower** nor **upper** options.
 Because of this lack of functionalities, the following properties were created on package property:
 
@@ -222,7 +222,7 @@ This property can be used as substitute of FloatProperty. It differs from the or
 ## SimpleDecimal
 
 Property used to describe decimal values with precise decimal places.
-On model the attribute is a Decimal instance. 
+On model the attribute is a Decimal instance.
 On database it is stored as a integer disregarding the dot, e.g, 1.00 is stored as 100.
 Options
 
@@ -243,9 +243,13 @@ Property used to define Brazilian postal code. It inherits from String. It inher
 
 Property used to define Brazilian personal document identifier. It inherits from String and validate the field as an Cpf using CpfField.
 
+## Cnpj
+
+Property used to define Brazilian companies by the Secretariat of the Federal Revenue of Brazil. It inherits from String and validate the field as an Cnpj using CnpjField.
+
 #Extending Fields - Implementing a field for Brazilian postal code
 
-With these properties and fields it is possible enhance your system validation. 
+With these properties and fields it is possible enhance your system validation.
 Besides that there are cases in which you would like create your own custom fields.
 Let's see how to do it!
 
@@ -253,7 +257,7 @@ Let's see how to do it!
 
 To show you how extend a Field let's implement a example.
 We are going to build a field to validate Brazilian postal code.
-It's content is formed by exactly eight numbers. 
+It's content is formed by exactly eight numbers.
 There can be a hyphen on fifth position.
 Bellow you can see the unit tests for it:
 
@@ -321,7 +325,7 @@ There are three important methods which must be overridden and we are going to s
 
 ## Step 3: Override **normalize_field**
 
-To implement the field we need to override **normalize_field**. 
+To implement the field we need to override **normalize_field**.
 This method receive a string, the commom format from a web request, and must transform in a respective database value.
 We want to save a string with only its characaters, e.g, without hyphen.
 So the overriden method is bellow:
@@ -340,8 +344,8 @@ One example is using default value if it is provided.
 
 ## Step 4: Override **localize_field**
 
-Another method that need be overridde is **localize_field**. 
-It receives need receive a value from db and transform it in a string. 
+Another method that need be overridde is **localize_field**.
+It receives need receive a value from db and transform it in a string.
 It does the exactly opposite of **normalize_field**.
 This value is commonly presented to final user and must be formatted accordingly.
 So the hyphen was inserted on sixth position:
@@ -358,7 +362,7 @@ This way the method can handle another commom cases, e.g,, transforming None val
 
 ## Step 5: Override **validate_field**
 
-Another method that need be overridde is **validate_field**. 
+Another method that need be overridde is **validate_field**.
 It receives a string value and must perform validation.
 A string containing the error message must be returned if there is error.
 So this was the result:
@@ -378,7 +382,7 @@ So this was the result:
 
 As on previous methods, the last line execute the respective parent method.
 This way the field validate some other common cases such as not allowing empty string if the field is required.
- 
+
 Another important thing is realize that the internationalization function is been used to return the message.
 Thus the error messages can be translated to another languages, as we are going to see on Internationalization section.
 
