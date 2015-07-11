@@ -162,20 +162,3 @@ class CnpjPropertyTests(GAETestCase):
 
         self.assertRaises(BoundaryError, StubModel, cnpj='694351540001')
         self.assertRaises(BoundaryError, StubModel, cnpj='6943515400010212')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
