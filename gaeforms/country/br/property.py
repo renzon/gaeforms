@@ -37,7 +37,8 @@ class CnpjProperty(StringProperty):
     """
 
     def _validate(self, value):
-        pass
+        if len(value) != 14:
+            raise BoundaryError('%s should have exactly 14 characters' % value)
 
 
 registry(CnpjProperty, CnpjField)
