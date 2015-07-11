@@ -97,6 +97,13 @@ class CnpjField(BaseField):
 
         return _('Invalid CNPJ')
 
+    def normalize_field(self, value):
+        if value:
+            return value.replace('-', '').replace('.', '').replace('/', '')
+        elif value == '':
+            value = None
+        return super(CnpjField, self).normalize_field(value)
+
     def __check_digit(self, number, weights):
         total = 0
         for i in xrange(0, len(weights)):
