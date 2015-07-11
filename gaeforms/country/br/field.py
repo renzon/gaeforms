@@ -102,8 +102,8 @@ class CnpjField(BaseField):
         if (first_digit == self.__check_digit(first_part, first_weights) and
            second_digit == self.__check_digit(number[:13], second_weights)):
             return None
-
-        return super(CnpjField, self).validate_field(number)
+        else:
+            return _('Invalid CNPJ')
 
     def normalize_field(self, value):
         if value:

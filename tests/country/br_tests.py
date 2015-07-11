@@ -126,7 +126,7 @@ class CnpjFieldTests(unittest.TestCase):
         self.assertIsNone(cnpj_field.validate('69.435.154/0001-02'))
         self.assertIsNone(cnpj_field.validate('53.612.734/0001-98'))
         self.assertEquals('CNPJ must contain only numbers', cnpj_field.validate('1231231aa12342'))
-        # self.assertEquals('Invalid CNPJ', cnpj_field.validate('12312313212342'))
+        self.assertEquals('Invalid CNPJ', cnpj_field.validate('12312313212342'))
         self.assertEquals('CNPJ must have exactly 14 characters', cnpj_field.validate('6188261300019'))
 
     def test_normalization(self):
