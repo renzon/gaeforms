@@ -79,10 +79,18 @@ class CpfField(BaseField):
 class CnpjField(BaseField):
 
     def validate_field(self, number):
-        number = number.replace('-', '').replace('.', '').replace('/', '')
+        if not number:
+            return super(CnpjField, self).validate_field(number)
+
+        number = self.normalize_field(number)
 
         if len(number) != 14:
             return _('CNPJ must have exactly 14 characters')
+
+        try:
+            int(number)
+        except:
+            return _('CNPJ must contain only numbers')
 
         first_weights = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
         second_weights = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
@@ -95,7 +103,7 @@ class CnpjField(BaseField):
            second_digit == self.__check_digit(number[:13], second_weights)):
             return None
 
-        return _('Invalid CNPJ')
+        return super(CnpjField, self).validate_field(number)
 
     def normalize_field(self, value):
         if value:
