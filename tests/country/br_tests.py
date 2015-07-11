@@ -120,9 +120,37 @@ class CpfPropertyTests(GAETestCase):
 
 class CnpjFieldTests(unittest.TestCase):
 
-    def test_cnpj_validation(self):
+    def test_validate(self):
         cnpj_field = CnpjField()
-        self.assertIsNone(cnpj_field.validate_field('69.435.154/0001-02'))
-        self.assertIsNone(cnpj_field.validate_field('53.612.734/0001-98'))
-        self.assertEquals('Invalid CNPJ', cnpj_field.validate_field('12312313212342'))
-        self.assertEquals('CNPJ must have exactly 14 characters', cnpj_field.validate_field('6188261300019'))
+        self.assertIsNone(cnpj_field.validate('69435154000102'))
+        self.assertIsNone(cnpj_field.validate('69.435.154/0001-02'))
+        self.assertIsNone(cnpj_field.validate('53.612.734/0001-98'))
+        self.assertEquals('Invalid CNPJ', cnpj_field.validate('12312313212342'))
+        self.assertEquals('CNPJ must have exactly 14 characters', cnpj_field.validate('6188261300019'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
