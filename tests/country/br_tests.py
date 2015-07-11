@@ -134,3 +134,28 @@ class CnpjFieldTests(unittest.TestCase):
         self.assertIsNone(field.normalize(None))
         self.assertEquals('69435154000102', field.normalize('69.435.154/0001-02'))
         self.assertEquals('69435154000102', field.normalize('69435154000102'))
+
+    def test_localization(self):
+        field = CnpjField()
+        self.assertEqual('', field.localize(''))
+        self.assertEqual('', field.localize(None))
+        self.assertEquals('69.435.154/0001-02', field.localize('69435154000102'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

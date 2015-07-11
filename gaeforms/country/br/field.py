@@ -104,6 +104,11 @@ class CnpjField(BaseField):
             value = None
         return super(CnpjField, self).normalize_field(value)
 
+    def localize_field(self, value):
+        if value:
+            return '%s.%s.%s/%s-%s' % (value[:2], value[2:5], value[5:8], value[8:12], value[12:14])
+        return super(CnpjField, self).localize_field(value)
+
     def __check_digit(self, number, weights):
         total = 0
         for i in xrange(0, len(weights)):
