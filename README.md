@@ -186,6 +186,10 @@ Field to validate and transform Brazilian postal codes. It transforms the string
 
 Field to validate and transform Brazilian personal document identifier. It transforms the string of type 067.687.258-15 to 06768725815 and validates the check digits.
 
+## Cnpj
+
+Property used to define Brazilian companies by the Secretariat of the Federal Revenue of Brazil. It transforms the string of type "69.435.154/0001-02" to 69435154000102 and validates it.
+
 # Extended ndb Properties
 
 Somo default ndb properties does have the same option as fields.
