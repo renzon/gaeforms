@@ -188,7 +188,7 @@ Field to validate and transform Brazilian personal document identifier. It trans
 
 ## Cnpj
 
-Property used to define Brazilian companies by the Secretariat of the Federal Revenue of Brazil. It transforms the string of type "69.435.154/0001-02" to 69435154000102 and validates it.
+Property used to define Brazilian companies by the Secretariat of the Federal Revenue of Brazil. It transforms the string of type 69.435.154/0001-02 to 69435154000102 and validates it.
 
 # Extended ndb Properties
 
