@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+from itertools import izip
 import operator
+
 from webapp2_extras.i18n import gettext as _
+
 from gaeforms.base import BaseField
 
 
@@ -33,7 +36,6 @@ class CepField(BaseField):
         elif value == '':
             value = None
         return super(CepField, self).normalize_field(value)
-
 
     def localize_field(self, value):
         if value:
@@ -77,7 +79,6 @@ class CpfField(BaseField):
 
 
 class CnpjField(BaseField):
-
     def validate_field(self, number):
         if not number:
             return super(CnpjField, self).validate_field(number)
@@ -100,7 +101,7 @@ class CnpjField(BaseField):
         second_digit = number[13]
 
         if (first_digit == self.__check_digit(first_part, first_weights) and
-           second_digit == self.__check_digit(number[:13], second_weights)):
+                    second_digit == self.__check_digit(number[:13], second_weights)):
             return None
         else:
             return _('Invalid CNPJ')
@@ -117,10 +118,9 @@ class CnpjField(BaseField):
             return '%s.%s.%s/%s-%s' % (value[:2], value[2:5], value[5:8], value[8:12], value[12:14])
         return super(CnpjField, self).localize_field(value)
 
-    def __check_digit(self, number, weights):
-        total = 0
-        for i in xrange(0, len(weights)):
-            total += int(number[i]) * weights[i]
+    @staticmethod
+    def __check_digit(number, weights):
+        total = sum((int(n) * w for n, w in izip(number, weights)))
 
         rest_division = total % 11
         if rest_division < 2:
