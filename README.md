@@ -192,7 +192,7 @@ Property used to define Brazilian companies by the Secretariat of the Federal Re
 
 # Extended ndb Properties
 
-Somo default ndb properties does have the same option as fields.
+Some default ndb properties does have the same option as fields.
 As a example, the IntegerProperty does not have a **lower** nor **upper** options.
 Because of this lack of functionalities, the following properties were created on package property:
 
