@@ -6,8 +6,6 @@ import datetime
 
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb.polymodel import PolyModel
-import webapp2
-from webapp2_extras import i18n
 from gaeforms import base
 
 from gaeforms.ndb.form import ModelForm, InvalidParams, ModelFormSecurityError
@@ -16,15 +14,6 @@ from util import GAETestCase
 from gaeforms.base import IntegerField
 
 
-app = webapp2.WSGIApplication(
-    [webapp2.Route('/', None, name='upload_handler')])
-
-request = webapp2.Request({'SERVER_NAME': 'test', 'SERVER_PORT': 80,
-                           'wsgi.url_scheme': 'http'})
-request.app = app
-app.set_globals(app=app, request=request)
-
-i18n.default_config['default_timezone'] = 'America/Sao_Paulo'
 
 
 class IntegerModelMock(ndb.Model):

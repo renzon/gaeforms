@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from itertools import izip
 import operator
 
-from webapp2_extras.i18n import gettext as _
+from gettext import gettext as _
 
 from gaeforms.base import BaseField
 

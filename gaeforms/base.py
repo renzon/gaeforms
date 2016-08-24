@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from decimal import Decimal
-import datetime
 
+import datetime
+import re
+from decimal import Decimal
+from gettext import gettext as _
+
+from babel import dates
+from babel.dates import parse_date, format_date, format_datetime
+from babel.numbers import parse_decimal, format_number, format_decimal
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import Model
-from webapp2_extras.i18n import gettext as _
-from webapp2_extras import i18n
-import pytz
-import re
+
+from gaeforms import settings
 
 
 class BaseField(object):
@@ -24,7 +28,6 @@ class BaseField(object):
         self.default = model_property._default
         self.repeated = model_property._repeated
         self.choices = model_property._choices
-
 
     def _set_attr_name(self, name):
         self._attr = name
@@ -49,7 +52,6 @@ class BaseField(object):
                 value = self.default
         if self.required and (value is None or value == ''):
             return _('Required field')
-
 
     def __get__(self, instance, owner):
         return getattr(instance, '_' + self._attr)
@@ -111,10 +113,14 @@ class BaseField(object):
                 value = self.default
         return value or ''
 
-_MAX_STRING_LENGTH=1500
+
+_MAX_STRING_LENGTH = 1500
+
+
 # Concrete fields
 class StringField(BaseField):
-    def __init__(self, required=False, default=None, repeated=False, choices=None, max_len=_MAX_STRING_LENGTH,exactly_len=None,min_len=None):
+    def __init__(self, required=False, default=None, repeated=False, choices=None, max_len=_MAX_STRING_LENGTH,
+                 exactly_len=None, min_len=None):
         super(StringField, self).__init__(required, default, repeated, choices)
         self.min_len = min_len
         self.exactly_len = exactly_len
@@ -128,19 +134,18 @@ class StringField(BaseField):
         self.exactly_len = getattr(model_property, 'exactly_len', None)
         self.min_len = getattr(model_property, 'min_len', None)
 
-
     def validate_field(self, value):
         if value is not None:
             len_value = len(value)
-            if self.exactly_len is not None and len_value !=self.exactly_len:
+            if self.exactly_len is not None and len_value != self.exactly_len:
                 return _('Has %(len)s characters and it must have exactly %(exactly_len)s') % {'len': len_value,
-                                                                                             'exactly_len': self.exactly_len}
+                                                                                               'exactly_len': self.exactly_len}
             if self.max_len and len_value > self.max_len:
                 return _('Has %(len)s characters and it must have %(max_len)s or less') % {'len': len_value,
-                                                                                             'max_len': self.max_len}
+                                                                                           'max_len': self.max_len}
             if self.min_len and len_value < self.min_len:
                 return _('Has %(len)s characters and it must have %(min_len)s or more') % {'len': len_value,
-                                                                                             'min_len': self.min_len}
+                                                                                           'min_len': self.min_len}
 
         return super(StringField, self).validate_field(value)
 
@@ -237,12 +242,13 @@ class IntegerField(BaseField):
         if isinstance(value, int):
             return value
         elif value is not None:
-            value = int(i18n.get_i18n().parse_decimal(value))
+            locale = settings.get_locale()
+            value = int(parse_decimal(value, locale=locale))
         return super(IntegerField, self).normalize_field(value)
 
     def localize_field(self, value):
         if value is not None:
-            return i18n.get_i18n().format_number(value)
+            return format_number(value, locale=settings.get_locale())
         return super(IntegerField, self).localize_field(value)
 
 
@@ -297,12 +303,12 @@ class FloatField(BaseField):
         if value == '':
             value = None
         elif value is not None:
-            value = float(i18n.get_i18n().parse_decimal(value))
+            value = float(parse_decimal(value, locale=settings.get_locale()))
         return super(FloatField, self).normalize_field(value)
 
     def localize_field(self, value):
         if value is not None and value != '':
-            return i18n.get_i18n().format_decimal(value)
+            return format_decimal(value, locale=settings.get_locale())
         return super(FloatField, self).localize_field(value)
 
 
@@ -325,7 +331,6 @@ class DecimalField(BaseField):
         self.lower = self._to_decimal(getattr(model_property, 'lower', None))
         self.upper = self._to_decimal(getattr(model_property, 'upper', None))
 
-
     def validate_field(self, value):
         try:
             value = self.normalize_field(value)
@@ -338,70 +343,83 @@ class DecimalField(BaseField):
         except:
             return _('Must be a number')
 
-
     def normalize_field(self, value):
         if isinstance(value, Decimal):
             return value
         if value == '':
             value = None
         elif value is not None:
-            value = i18n.get_i18n().parse_decimal(value)
+            value = parse_decimal(value, locale=settings.get_locale())
             rounded = int(round(Decimal(value) * self.__multiplier))
             value = Decimal(rounded) / self.__multiplier
         return super(DecimalField, self).normalize_field(value)
 
     def localize_field(self, value):
         if value is not None and value != '':
-            return i18n.get_i18n().format_decimal(value)
+            return format_decimal(value, locale=settings.get_locale())
         return super(DecimalField, self).localize_field(value)
 
 
-class DateField(BaseField):
-    def __init__(self, required=False, default=None, repeated=False, choices=None):
+class DateFieldMixin(object):
+    def localize_date(self, value):
+        if isinstance(value, datetime.datetime):
+            value = datetime.date(value.year, value.month, value.day)
+        pattern = self.get_date_format()
+        return format_date(value, format=pattern)
+
+    def get_date_format(self):
+        pattern = dates.get_date_format(format=self.format, locale=settings.get_locale()).pattern
+        for c in ('M', 'd', 'yy'):
+            double_char = c * 2
+            if double_char not in pattern:
+                pattern = pattern.replace(c, double_char)
+        return pattern
+
+    def get_time_format(self):
+        return 'HH:mm:ss'
+
+
+class DateField(BaseField, DateFieldMixin):
+    def __init__(self, required=False, default=None, repeated=False, choices=None, format='short'):
         super(DateField, self).__init__(required, default, repeated, choices)
+        self.format = format
 
     def normalize_field(self, value):
         if isinstance(value, basestring):
-            return i18n.get_i18n().parse_date(value)
+            return parse_date(value, locale=settings.get_locale())
         return super(DateField, self).normalize_field(value)
 
     def validate_field(self, value):
         try:
             value = self.normalize_field(value)
             return super(DateField, self).validate_field(value)
-        except:
-            return _('Invalid date. Must be on format %(format)s') % {'format': _('MM/dd/YYYY')}
+        except Exception:
+            example = self.localize_field(datetime.date(2016, 12, 25))
+            return _('Invalid date. Valid example: %(date)s') % {'date': example}
 
     def localize_field(self, value):
         if value:
-            if isinstance(value, datetime.datetime):
-                value = datetime.date(value.year, value.month, value.day)
-            return i18n.get_i18n().format_date(value, format=_('MM/dd/YYYY'))
+            return self.localize_date(value)
+
         return super(DateField, self).localize_field(value)
 
 
-class DateTimeField(BaseField):
-    def __init__(self, required=False, default=None, repeated=False, choices=None):
+class DateTimeField(BaseField, DateFieldMixin):
+    def __init__(self, required=False, default=None, repeated=False, choices=None, format='short'):
         super(DateTimeField, self).__init__(required, default, repeated, choices)
-
+        self.format = format
 
     def normalize_field(self, value):
         if isinstance(value, basestring):
-            # workaround because  i18n.parse_datetime is not working
-            def _to_datetime(date, time=None):
-                if time is None:
-                    time = date
-                return datetime.datetime(date.year, date.month, date.day, time.hour, time.minute, time.second)
+            locale = settings.get_locale()
 
-            slices = value.split(' ')
-            dt_slice = slices[0]
-            time_slice = slices[1]
-            i18n_obj = i18n.get_i18n()
-            date, time = i18n_obj.parse_date(dt_slice), i18n_obj.parse_time(time_slice)
-            loc_datime_without_tz = _to_datetime(date, time)
-            localized_time = i18n_obj.tzinfo.localize(loc_datime_without_tz)
-            utc_datetime = pytz.utc.normalize(localized_time)
-            return _to_datetime(utc_datetime)
+            date_str, time_str = value.split(' ')
+            date = dates.parse_date(date_str, locale)
+            time = dates.parse_time(time_str, locale)
+            dtime = datetime.datetime(date.year, date.month, date.day, time.hour, time.minute, time.second)
+            dtime = settings.get_timezone().localize(dtime)
+            utc_dt = dates.UTC.normalize(dtime)
+            return utc_dt.replace(tzinfo=None)
 
         return super(DateTimeField, self).normalize_field(value)
 
@@ -410,12 +428,16 @@ class DateTimeField(BaseField):
             value = self.normalize_field(value)
             return super(DateTimeField, self).validate_field(value)
         except:
-            return _('Invalid datetime. Must be on format %(format)s') % {'format': _('MM/dd/YYYY HH:mm:ss')}
+            example = self.localize(datetime.datetime(2016, 12, 25, 18, 0, 0))
+            return _('Invalid datetime. Valid example: %(datetime)s') % {'datetime': example}
 
     def localize_field(self, value):
         if value:
-            datetime = i18n.to_local_timezone(value)
-            return i18n.format_datetime(datetime, _('MM/dd/YYYY HH:mm:ss'))
+            utc_dt = value.replace(tzinfo=dates.UTC)
+            local_dt = settings.get_timezone().normalize(utc_dt)
+
+            pattern = '{0} {1}'.format(self.get_date_format(), self.get_time_format())
+            return format_datetime(local_dt, pattern)
         return super(DateTimeField, self).localize_field(value)
 
 
@@ -437,7 +459,6 @@ class _FormMetaclass(type):
 class Form(object):
     _fields = ()
     __metaclass__ = _FormMetaclass
-
 
     def __init__(self, **kwargs):
         self.fill(**kwargs)
@@ -474,5 +495,3 @@ class Form(object):
         if fields:
             return {k: _localize(k, self._fields[k]) for k in fields}
         return {k: _localize(k, v) for k, v in self._fields.iteritems()}
-
-

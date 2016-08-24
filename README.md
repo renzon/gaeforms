@@ -296,7 +296,7 @@ class CepFieldTests(unittest.TestCase):
 Your custom field must inherit from BaseField or another Field class as bellow:
 
 ```python
-from webapp2_extras.i18n import gettext as _
+from gettext import gettext as _
 
 
 class CepField(BaseField):

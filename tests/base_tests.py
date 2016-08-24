@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from decimal import Decimal
-import unittest
+
 import datetime
+import unittest
+from decimal import Decimal
 
 from google.appengine.ext.ndb import Model, Key
-import webapp2
-from gaeforms import base
 
+from gaeforms import base, settings
 from gaeforms.base import BaseField, Form, IntegerField, DecimalField, StringField, DateField, DateTimeField, \
-    FloatField, \
-    EmailField, BooleanField, KeyField
-
-
+    FloatField, EmailField, BooleanField, KeyField
 from util import GAETestCase
 
+@settings.locale_factory
+def locale_stub():
+    return 'en_us'
+@settings.tz_factory
+def timezone_stub():
+    return 'America/Sao_Paulo'
 
 
 def error_msg(attr_name):
@@ -53,7 +56,6 @@ class FormTests(unittest.TestCase):
         self.assertTupleEqual(('a', 'b'), (form.attr1, form.attr2))
         self.assertTupleEqual(('c', 'd'), (v2.attr1, v2.attr2))
 
-
     def test_validate(self):
         form = FormExample(attr1=True, attr2=True)
         self.assertDictEqual({}, form.validate())
@@ -64,7 +66,6 @@ class FormTests(unittest.TestCase):
         form = FormExample(attr1=False, attr2=False)
         self.assertDictEqual({'attr1': error_msg('attr1'), 'attr2': error_msg('attr2')}, form.validate())
 
-
     def test_normalize(self):
         form = FormExample(attr1='1', attr2='2')
         self.assertDictEqual({'attr1': 1, 'attr2': 2}, form.normalize())
@@ -72,7 +73,6 @@ class FormTests(unittest.TestCase):
     def test_normalize(self):
         form = FormExample(attr1='1', attr2='2')
         self.assertDictEqual({'attr1': 1, 'attr2': 2}, form.normalize())
-
 
     def test_localize(self):
         form = FormExample()
@@ -133,7 +133,6 @@ class BaseFieldTests(unittest.TestCase):
         self.assertIsNone(field.validate('1'))
         self.assertIsNone(field.validate('2'))
         self.assertEqual('Must be one of: 1; 2', field.validate(None))
-
 
     def test_repeated(self):
         field = BaseField(repeated=True)
@@ -268,7 +267,6 @@ class KeyFieldTests(GAETestCase):
         self.assertIsNone(field.validate('1'))
         self.assertEqual('Invalid key', field.validate('abcd'))
 
-
     def test_localization(self):
         class ModelMock(Model):
             pass
@@ -362,7 +360,6 @@ class FloatFieldTests(unittest.TestCase):
         self.assertAlmostEqual('1,111,000.34', field.localize(1111000.34))
         self.assertAlmostEqual('1,111,000.33', field.localize(1111000.33))
 
-
     def test_validation(self):
         field = FloatField()
         field._set_attr_name('n')
@@ -418,7 +415,6 @@ class DecimalFieldTests(unittest.TestCase):
         self.assertEqual('1,111,000.34', field.localize(Decimal('1111000.34')))
         self.assertEqual('1,111,000.33', field.localize(Decimal('1111000.33')))
 
-
     def test_validation(self):
         field = DecimalField()
         field._set_attr_name('n')
@@ -448,7 +444,8 @@ class StringFieldTests(unittest.TestCase):
     def test_str_with_more_than_500_chars(self):
         field = StringField()
         field._set_attr_name('n')
-        self.assertEqual('Has 1501 characters and it must have 1500 or less', field.validate_field('a' * (base._MAX_STRING_LENGTH+1)))
+        self.assertEqual('Has 1501 characters and it must have 1500 or less',
+                         field.validate_field('a' * (base._MAX_STRING_LENGTH + 1)))
 
     def test_str_with_more_than_500_chars_but_with_no_max(self):
         field = StringField(max_len=None)
@@ -492,14 +489,14 @@ class DateFieldTests(unittest.TestCase):
         field._set_attr_name('d')
         self.assertIsNone(field.validate('09/30/2000'))
         self.assertIsNone(field.validate(datetime.date(2000, 9, 30)))
-        self.assertEqual('Invalid date. Must be on format MM/dd/YYYY', field.validate('09/30/a'))
+        self.assertEqual('Invalid date. Valid example: 12/25/2016', field.validate('09/30/a'))
 
 
 class DateTimeFieldTests(unittest.TestCase):
     def test_normalization(self):
         field = DateTimeField()
-        dt = field.normalize('09/30/2000 00:00:00')
-        self.assertEqual(datetime.datetime(2000, 9, 30, 3, 0, 0), dt)
+        dt = field.normalize('09/30/2016, 12:00:00')
+        self.assertEqual(datetime.datetime(2016, 9, 30, 15, 0, 0), dt)
         dt = field.normalize('09/30/2000 23:00:00')
         datetime_datetime = datetime.datetime(2000, 10, 1, 2, 0, 0)
         self.assertEqual(datetime_datetime, dt)
@@ -515,9 +512,9 @@ class DateTimeFieldTests(unittest.TestCase):
     def test_validate(self):
         field = DateTimeField()
         field._set_attr_name('d')
-        self.assertIsNone(field.validate('09/30/2000 23:59:59'))
+        self.assertIsNone(field.validate('09/30/2000 23:59:00'))
         self.assertIsNone(field.validate(datetime.datetime(2000, 10, 1, 2, 0, 0)))
-        self.assertEqual('Invalid datetime. Must be on format MM/dd/YYYY HH:mm:ss',
+        self.assertEqual('Invalid datetime. Valid example: 12/25/2016 16:00:00',
                          field.validate('09/30/2000 23:59:a'))
 
     def test_date_assignment(self):
@@ -526,4 +523,3 @@ class DateTimeFieldTests(unittest.TestCase):
         date = datetime.datetime(2000, 9, 30)
         dt = field.normalize(date)
         self.assertEqual(date, dt)
-
