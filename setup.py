@@ -133,5 +133,5 @@ setup(
     ],
     zip_safe=False,
     install_requires=['pytz>=2014.4',
-                      'Babel>=1.3']
+                      'Babel>=2.3.4']
 )
