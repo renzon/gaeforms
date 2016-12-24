@@ -248,7 +248,7 @@ class IntegerField(BaseField):
 
     def localize_field(self, value):
         if value is not None:
-            return format_number(value, locale=settings.get_locale())
+            return int(value)
         return super(IntegerField, self).localize_field(value)
 
 

@@ -208,7 +208,7 @@ class ModelFormTests(GAETestCase):
                           datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
                           date=datetime.datetime(1999, 8, 1))
         localized_dct = model_form.fill_with_model(model)
-        expected_dct = {'b': False, 'integer': '1', 'i': '1', 'float_bounded': '2.6', 'f': '2.1',
+        expected_dct = {'b': False, 'integer': 1, 'i': 1, 'float_bounded': '2.6', 'f': '2.1',
                         'email': 'foo@bar.com',
                         'another': 1,
                         'decimal': '0.001', 'currency': '0.01', 'str': 'a', 'str_not_indexed': 'b', 'txt': 't',
@@ -234,13 +234,13 @@ class ModelFormTests(GAETestCase):
                           datetime=datetime.datetime(2000, 9, 30, 23, 56, 56),
                           date=datetime.datetime(1999, 8, 1))
         localized_dct = model_form.fill_with_model(model, 'integer')
-        self.assertDictEqual({'integer': '1'}, localized_dct)
+        self.assertDictEqual({'integer': 1}, localized_dct)
         localized_dct = model_form.fill_with_model(model, 'integer', 'txt')
-        self.assertDictEqual({'integer': '1', 'txt': 't'}, localized_dct)
+        self.assertDictEqual({'integer': 1, 'txt': 't'}, localized_dct)
 
         id = model.put().id()
         localized_dct = model_form.fill_with_model(model, 'integer', 'txt')
-        self.assertDictEqual({'id': id, 'integer': '1', 'txt': 't'}, localized_dct)
+        self.assertDictEqual({'id': id, 'integer': 1, 'txt': 't'}, localized_dct)
 
 
     def test_populate_form_model_with_defaults(self):
