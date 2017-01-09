@@ -1,0 +1,35 @@
+language: python
+
+python:
+  - 2.7
+
+env:
+  global:
+    - GAE_DIR=/tmp/gae
+    - EMAIL=shippable@gmail.com
+    - secure: lffPR8giDdKinq1LfjTabgM8Lufb3sdweFWJcoU8o/KIvwTg9NOxEw3oG5pw4+pI0c3q/k0JkBv7QgDGkoiRHwZkebWYNcHwyo2NFaa/cpwpNjv3pMZsXpMiw+duSvfjA/XmFAynmW8/ft2YaAzpB1Mbn5p2k7ID2qCMv/YmFgIu605VK/WUnYPEdxMD2vkifVSNAIH42GOR+2ht4nKj85Wsu9OGgMBJ5XAqVcQoWX+Ui9yZvtaf3WKzowg+MC4PQ0qGLH/l6WHkY8bBCduMz65JjZIss2s972L4P8Hwpk+gDdVtRE82hKH7GuEYdNKhKjbthZmn5AF4thI72N5TjQ==
+
+before_install:
+  - >
+    test -e $GAE_DIR || 
+    (mkdir -p $GAE_DIR && 
+     wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.23.zip -q -O /tmp/gae.zip &&
+     unzip /tmp/gae.zip -d $GAE_DIR)
+  - export PYTHONPATH="$PYTHONPATH:$GAE_DIR/google_appengine"
+  - export GAE_SDK=$GAE_DIR/google_appengine
+  - export PATH=/bin:/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:$GAE_DIR:$PATH
+
+
+install:
+  - sudo pip install -r venv/shippable_requirements.txt
+
+script:
+  - nosetests
+
+notifications:
+     email:
+         recipients:
+            - felipevolpone@gmail.com
+            - renzo.n@gmail.com
+         on_success: change
+         on_failure: always
